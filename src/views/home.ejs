@@ -4,388 +4,746 @@
     <meta charset="UTF-8">
     <title>NIRD – Résistance Numérique</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Tailwind CDN (comme spécifié dans la demande) -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Police retro gaming -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&family=VT323&display=swap" rel="stylesheet">
     
-    <!-- Styles personnalisés -->
+    <!-- Styles personnalisés rétro gaming -->
     <style>
-        /* Palette de couleurs améliorée */
         :root {
-            --matrix-primary: #00ff95;
-            --matrix-primary-dark: #00cc77;
-            --matrix-secondary: #ff0033;
-            --matrix-secondary-light: #ff3366;
-            --matrix-blue: #0066ff;
-            --matrix-blue-light: #3399ff;
-            --matrix-bg: #0a0a0a;
-            --matrix-bg-light: #121212;
-            --matrix-text: #e0e0e0;
-            --matrix-text-light: #ffffff;
+            --retro-green: #00ff41;
+            --retro-pink: #ff00ff;
+            --retro-blue: #00b3ff;
+            --retro-yellow: #ffff00;
+            --retro-bg: #0a0a12;
+            --retro-grid: #1a1a2e;
+            --crt-flicker: rgba(0, 255, 65, 0.1);
         }
         
         body {
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-            background: var(--matrix-bg);
-            font-family: 'Segoe UI', 'Courier New', system-ui, -apple-system, sans-serif;
-            color: var(--matrix-text);
+            background-color: var(--retro-bg);
+            background-image: 
+                linear-gradient(var(--retro-grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--retro-grid) 1px, transparent 1px);
+            background-size: 40px 40px;
+            font-family: 'VT323', 'Courier New', monospace;
+            color: var(--retro-green);
             min-height: 100vh;
+            overflow-x: hidden;
             position: relative;
         }
         
-        /* Effet Matrix subtil en arrière-plan */
-        #matrix-canvas {
+        /* Effet CRT (écran cathodique) */
+        body::before {
+            content: "";
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 0, 0, 0.15),
+                    rgba(0, 0, 0, 0.15) 1px,
+                    transparent 1px,
+                    transparent 2px
+                );
+            pointer-events: none;
+            z-index: 9999;
+            animation: flicker 0.15s infinite;
+        }
+        
+        /* Effet de scanlines */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                transparent 50%,
+                rgba(0, 0, 0, 0.2) 50%
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 9998;
+            animation: scanlines 10s linear infinite;
+        }
+        
+        /* Animation CRT */
+        @keyframes flicker {
+            0% { opacity: 0.97; }
+            5% { opacity: 0.99; }
+            10% { opacity: 0.97; }
+            15% { opacity: 1; }
+            20% { opacity: 0.98; }
+            50% { opacity: 1; }
+            100% { opacity: 0.97; }
+        }
+        
+        @keyframes scanlines {
+            from { background-position: 0 0; }
+            to { background-position: 0 100vh; }
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+        
+        @keyframes pixelate {
+            0% { filter: blur(0px); }
+            50% { filter: blur(1px); }
+            100% { filter: blur(0px); }
+        }
+        
+        /* Style retro gaming */
+        .retro-title {
+            font-family: 'Press Start 2P', cursive;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 
+                0 0 10px var(--retro-green),
+                0 0 20px var(--retro-green),
+                0 0 30px var(--retro-green);
+            animation: blink 2s infinite, glitch 5s infinite;
+            position: relative;
+        }
+        
+        .retro-title::before, .retro-title::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .retro-title::before {
+            animation: glitch 3s infinite;
+            color: var(--retro-pink);
             z-index: -1;
-            opacity: 0.3; /* Réduit pour améliorer la lisibilité */
         }
         
-        /* Animation d'entrée améliorée */
-        @keyframes fadeInUp {
-            from { 
-                opacity: 0; 
-                transform: translateY(30px); 
-            }
-            to { 
-                opacity: 1; 
-                transform: translateY(0); 
-            }
+        .retro-title::after {
+            animation: glitch 2s infinite reverse;
+            color: var(--retro-blue);
+            z-index: -2;
         }
         
-        @keyframes pulseGlow {
-            0%, 100% { 
-                box-shadow: 0 0 10px rgba(0, 255, 149, 0.3);
-            }
-            50% { 
-                box-shadow: 0 0 20px rgba(0, 255, 149, 0.6);
-            }
+        .retro-border {
+            border: 4px solid var(--retro-green);
+            border-image: 
+                repeating-linear-gradient(
+                    45deg,
+                    var(--retro-green),
+                    var(--retro-green) 10px,
+                    var(--retro-bg) 10px,
+                    var(--retro-bg) 20px
+                ) 4;
+            box-shadow: 
+                0 0 20px var(--retro-green),
+                inset 0 0 20px var(--retro-green);
+            position: relative;
+            background: rgba(10, 10, 18, 0.9);
         }
         
-        /* Amélioration de la lisibilité du texte */
-        .content-container {
-            background: rgba(10, 10, 10, 0.85);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            border: 1px solid rgba(0, 255, 149, 0.1);
+        .retro-border::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            right: -8px;
+            bottom: -8px;
+            border: 2px solid var(--retro-pink);
+            z-index: -1;
+            opacity: 0.5;
         }
         
-        /* Style des boutons améliorés */
-        .pill-btn {
+        .retro-button {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            border: none;
             position: relative;
             overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-weight: 600;
-            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            text-shadow: 0 0 5px currentColor;
+            animation: pixelate 4s infinite;
         }
         
-        .pill-btn:hover {
-            transform: translateY(-5px) scale(1.03);
-        }
-        
-        .pill-btn::before {
+        .retro-button::before {
             content: '';
             position: absolute;
             top: 0;
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.4),
+                transparent
+            );
             transition: left 0.7s;
         }
         
-        .pill-btn:hover::before {
+        .retro-button:hover::before {
             left: 100%;
         }
         
-        .pill-red {
-            background: linear-gradient(135deg, var(--matrix-secondary), #c00028);
+        .retro-button:hover {
+            transform: scale(1.05);
+            animation: glitch 0.3s;
+        }
+        
+        .red-pill {
+            background: linear-gradient(45deg, #ff0033, #cc0029);
             color: white;
-            border: 2px solid rgba(255, 0, 51, 0.5);
+            box-shadow: 
+                0 0 20px #ff0033,
+                0 0 40px #ff0033,
+                inset 0 0 20px rgba(255, 255, 255, 0.2);
         }
         
-        .pill-red:hover {
-            background: linear-gradient(135deg, var(--matrix-secondary-light), #e00030);
-            box-shadow: 0 10px 25px rgba(255, 0, 51, 0.4);
+        .red-pill:hover {
+            box-shadow: 
+                0 0 30px #ff3366,
+                0 0 50px #ff3366,
+                inset 0 0 20px rgba(255, 255, 255, 0.4);
         }
         
-        .pill-blue {
-            background: linear-gradient(135deg, var(--matrix-blue), #0047b3);
+        .blue-pill {
+            background: linear-gradient(45deg, #0066ff, #0052cc);
             color: white;
-            border: 2px solid rgba(0, 102, 255, 0.5);
+            box-shadow: 
+                0 0 20px #0066ff,
+                0 0 40px #0066ff,
+                inset 0 0 20px rgba(255, 255, 255, 0.2);
         }
         
-        .pill-blue:hover {
-            background: linear-gradient(135deg, var(--matrix-blue-light), #005ce6);
-            box-shadow: 0 10px 25px rgba(0, 102, 255, 0.4);
+        .blue-pill:hover {
+            box-shadow: 
+                0 0 30px #3399ff,
+                0 0 50px #3399ff,
+                inset 0 0 20px rgba(255, 255, 255, 0.4);
         }
         
-        /* Amélioration de la typographie */
-        .title-text {
-            color: var(--matrix-text-light);
-            font-weight: 800;
-            line-height: 1.2;
-            text-shadow: 0 0 15px rgba(0, 255, 149, 0.5);
-            background: linear-gradient(90deg, #00ff95, #00ccff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        /* Terminal effect */
+        .terminal-text {
+            font-family: 'VT323', monospace;
+            font-size: 1.4rem;
+            line-height: 1.6;
+            border-right: 3px solid var(--retro-green);
+            white-space: nowrap;
+            overflow: hidden;
+            animation: 
+                typing 4s steps(40, end),
+                blink-caret 0.75s step-end infinite;
         }
         
-        .highlight {
-            color: var(--matrix-primary);
-            font-weight: 700;
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
         }
         
-        /* Indicateur de choix */
-        .choice-label {
-            font-size: 0.9rem;
-            font-weight: 600;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-            opacity: 0.9;
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: var(--retro-green) }
         }
         
-        /* Responsive amélioré */
+        /* Pixel art decoration */
+        .pixel-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(
+                    circle at 20% 30%, 
+                    transparent 20%, 
+                    rgba(0, 255, 65, 0.05) 21%, 
+                    transparent 22%
+                ),
+                radial-gradient(
+                    circle at 80% 70%, 
+                    transparent 20%, 
+                    rgba(255, 0, 255, 0.05) 21%, 
+                    transparent 22%
+                );
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        /* Matrix rain effect retro */
+        .matrix-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            opacity: 0.4;
+            filter: blur(0.5px);
+        }
+        
+        /* 8-bit animation for stats */
+        .bit-counter {
+            font-family: 'Press Start 2P', cursive;
+            color: var(--retro-yellow);
+            text-shadow: 0 0 10px var(--retro-yellow);
+            animation: blink 1s infinite;
+        }
+        
+        /* Responsive design */
         @media (max-width: 768px) {
-            .content-container {
-                margin: 20px;
-                padding: 25px !important;
+            .retro-title {
+                font-size: 1.8rem !important;
             }
             
-            .title-text {
-                font-size: 2.5rem !important;
+            .terminal-text {
+                font-size: 1.1rem;
+                white-space: normal;
+                border-right: none;
+                animation: none;
             }
             
             .choices-container {
                 flex-direction: column;
-                align-items: center;
-            }
-            
-            .pill-btn {
-                width: 100%;
-                max-width: 320px;
-                margin-bottom: 15px;
+                gap: 20px !important;
             }
         }
         
-        /* Animation pour les éléments de texte */
-        .fade-in-element {
-            animation: fadeInUp 0.8s ease-out forwards;
-            opacity: 0;
+        /* Loading screen effect */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--retro-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: fadeOut 1s ease-in-out 3s forwards;
         }
         
-        .delay-1 {
-            animation-delay: 0.3s;
+        @keyframes fadeOut {
+            to { opacity: 0; visibility: hidden; }
         }
         
-        .delay-2 {
-            animation-delay: 0.6s;
-        }
-        
-        .delay-3 {
-            animation-delay: 0.9s;
+        .loading-text {
+            font-family: 'Press Start 2P', cursive;
+            color: var(--retro-green);
+            font-size: 1.2rem;
+            animation: blink 0.5s infinite;
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
-    <!-- Canvas pour l'effet Matrix -->
-    <canvas id="matrix-canvas"></canvas>
+<body class="p-4 md:p-0">
+    
+    <!-- Loading screen retro -->
+    <div class="loading-screen">
+        <div class="text-center">
+            <div class="loading-text mb-4">SYSTEM BOOT</div>
+            <div class="inline-block w-64 h-2 bg-gray-800 overflow-hidden">
+                <div class="h-full bg-green-500 animate-pulse" style="width: 0%; animation: load 3s ease-in-out forwards;"></div>
+            </div>
+            <div class="loading-text mt-4">LOADING N.I.R.D OS</div>
+        </div>
+    </div>
+    
+    <!-- Effet Matrix rétro -->
+    <canvas class="matrix-rain" id="matrixCanvas"></canvas>
+    
+    <!-- Pixel grid decoration -->
+    <div class="pixel-grid"></div>
     
     <!-- Contenu principal -->
-    <div class="content-container max-w-4xl w-full p-10 fade-in-element">
-        <!-- En-tête -->
-        <div class="text-center mb-10 fade-in-element">
-            <div class="mb-4">
-                <span class="inline-block px-4 py-2 rounded-full bg-gray-900 text-green-400 text-sm font-semibold border border-green-500/30">
-                    #RésistanceNumérique
-                </span>
-            </div>
-            <h1 class="title-text text-5xl md:text-6xl mb-6">
-                NIRD — Nouvelle Initiative pour un Numérique Responsable & Durable
-            </h1>
-        </div>
+    <div class="container mx-auto px-4 py-8 md:py-16 max-w-6xl relative">
         
-        <!-- Introduction améliorée -->
-        <div class="mb-12 fade-in-element delay-1">
-            <p class="text-xl leading-relaxed mb-6 text-gray-300">
-                La fin du support de <span class="highlight">Windows 10</span> marque un tournant critique : 
-                des millions d'utilisateurs sont contraints à l'obsolescence programmée, accentuant la fracture numérique et notre dépendance technologique.
-            </p>
+        <!-- En-tête avec effet ASCII Art -->
+        <header class="text-center mb-12">
+            <div class="mb-8">
+                <div class="inline-block px-4 py-2 retro-border mb-6">
+                    <span class="text-green-400 font-bold text-lg tracking-widest">[ N.I.R.D OS v2.0 ]</span>
+                </div>
+                
+                <!-- ASCII Art Title -->
+                <div class="mb-8 text-left max-w-md mx-auto text-xs md:text-sm opacity-70">
+                    <pre class="text-green-400 font-mono">
+  _   _ ___ ___  ___  
+ | \ | | _ \   \|   \ 
+ |  \| |   / |) | |) |
+ |_|\__|_|_\___/|___/ 
+                    </pre>
+                </div>
+                
+                <h1 class="retro-title text-4xl md:text-6xl mb-6" data-text="RÉSISTANCE NUMÉRIQUE">
+                    RÉSISTANCE NUMÉRIQUE
+                </h1>
+                
+                <div class="text-pink-500 font-mono text-sm md:text-base mb-4 animate-pulse">
+                    [ SYSTEM ALERT: WINDOWS 10 EOL DETECTED ]
+                </div>
+            </div>
+        </header>
+        
+        <!-- Section principale avec effet terminal -->
+        <main class="retro-border p-6 md:p-10 mb-12 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-500 to-pink-500"></div>
             
-            <div class="bg-gray-900/50 border-l-4 border-green-500 p-6 rounded-r-lg mb-8">
-                <p class="text-lg italic text-gray-200">
-                    "Un autre chemin est possible : un numérique <span class="font-bold text-green-400">inclusif</span>, 
-                    <span class="font-bold text-green-400">responsable</span> et <span class="font-bold text-green-400">durable</span>, 
-                    respectueux de vos données, de votre autonomie et de notre planète."
+            <div class="terminal-text mb-8 text-green-300">
+                <span class="text-yellow-400">user@nird:~$</span> system_analysis --init
+            </div>
+            
+            <div class="space-y-6 text-lg md:text-xl">
+                <p class="text-cyan-300">
+                    <span class="text-yellow-400">></span> À l'ère où la fin du support de 
+                    <span class="text-red-400 font-bold">Windows 10</span> nous rappelle notre dépendance technologique...
+                </p>
+                
+                <p class="text-green-300">
+                    <span class="text-yellow-400">></span> Un système alternatif s'initialise : 
+                    <span class="text-green-400 font-bold">NUMÉRIQUE INCLUSIF, RESPONSABLE, DURABLE</span>
+                </p>
+                
+                <div class="p-4 bg-black/50 border-l-4 border-green-500 my-6">
+                    <p class="text-white italic">
+                        <span class="text-yellow-400">#</span> "Un autre OS est possible. Un autre futur est exécutable."
+                    </p>
+                </div>
+                
+                <p class="text-cyan-300">
+                    <span class="text-yellow-400">></span> Le terminal vous attend. Quelle commande allez-vous exécuter ?
                 </p>
             </div>
             
-            <p class="text-xl leading-relaxed text-gray-300">
-                Face à ce choix crucial, quel chemin emprunteras-tu ? La soumission à l'obsolescence programmée, 
-                ou la reconquête de ta souveraineté numérique ?
-            </p>
-        </div>
+            <!-- Stats en 8-bit -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10 pt-8 border-t border-green-900">
+                <div class="text-center">
+                    <div class="bit-counter text-2xl md:text-3xl">150K+</div>
+                    <div class="text-green-400 text-sm">RESISTANTS</div>
+                </div>
+                <div class="text-center">
+                    <div class="bit-counter text-2xl md:text-3xl">24/7</div>
+                    <div class="text-green-400 text-sm">SYSTEM ONLINE</div>
+                </div>
+                <div class="text-center">
+                    <div class="bit-counter text-2xl md:text-3xl">100%</div>
+                    <div class="text-green-400 text-sm">OPEN SOURCE</div>
+                </div>
+                <div class="text-center">
+                    <div class="bit-counter text-2xl md:text-3xl">∞</div>
+                    <div class="text-green-400 text-sm">POSSIBILITIES</div>
+                </div>
+            </div>
+        </main>
         
-        <!-- Choix améliorés -->
-        <div class="fade-in-element delay-2">
-            <p class="text-center text-gray-400 mb-8 text-lg">
-                Sélectionne ta voie :
-            </p>
+        <!-- Choix avec effet retro gaming -->
+        <section class="mb-16">
+            <div class="text-center mb-10">
+                <div class="inline-block px-6 py-3 retro-border mb-4">
+                    <h2 class="text-2xl md:text-3xl font-bold text-green-400 tracking-widest">
+                        [ CHOOSE YOUR PATH ]
+                    </h2>
+                </div>
+                <p class="text-green-300 text-lg animate-pulse">
+                    Appuyez sur START pour continuer
+                </p>
+            </div>
             
-            <div class="choices-container flex flex-col md:flex-row justify-center items-center gap-6 md:gap-8">
-                <!-- Pilule Rouge -->
-                <div class="choice-group text-center w-full md:w-1/2">
-                    <div class="choice-label text-red-400">CHOIX DE LIBÉRATION</div>
-                    <a href="/choose-role" class="pill-btn pill-red inline-block px-10 py-5 rounded-full text-xl font-bold">
-                        <div class="flex items-center justify-center gap-3">
-                            <span>Pilule Rouge</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                            </svg>
+            <div class="choices-container flex flex-col md:flex-row justify-center items-center gap-8 md:gap-12">
+                <!-- Pilule Rouge - Style Arcade -->
+                <a href="/choose-role" class="group relative w-full md:w-1/2 max-w-md">
+                    <div class="absolute -inset-4 bg-gradient-to-r from-red-900/30 to-transparent rounded-3xl blur-lg group-hover:blur-xl transition-all duration-500"></div>
+                    
+                    <div class="relative retro-border p-2 h-full">
+                        <div class="bg-black/90 p-8 h-full">
+                            <div class="flex items-center justify-between mb-6">
+                                <div class="text-red-400 font-bold text-xl tracking-widest">[ P1 ]</div>
+                                <div class="text-yellow-400 animate-pulse">PLAYER 1 READY</div>
+                            </div>
+                            
+                            <div class="text-center mb-8">
+                                <div class="inline-block px-6 py-3 bg-red-900/50 border-2 border-red-700 mb-4">
+                                    <h3 class="retro-button text-2xl md:text-3xl text-white" style="font-family: 'Orbitron', sans-serif;">
+                                        PILULE ROUGE
+                                    </h3>
+                                </div>
+                                <p class="text-gray-300 text-lg mb-6">
+                                    <span class="text-red-400">>></span> ACCÉDER AU CODE SOURCE
+                                </p>
+                                <p class="text-white">
+                                    Rejoignez la résistance, découvrez la vérité sur le système,<br>
+                                    reprenez le contrôle de vos données.
+                                </p>
+                            </div>
+                            
+                            <button class="retro-button red-pill w-full py-5 text-xl font-bold rounded-none">
+                                [ EXECUTE: JOIN_RESISTANCE ]
+                            </button>
+                            
+                            <div class="mt-6 text-center text-gray-500 text-sm">
+                                <span class="text-green-400">▲</span> RECOMMANDÉ <span class="text-green-400">▲</span>
+                            </div>
                         </div>
-                        <div class="text-sm mt-2 opacity-90 font-normal">Rejoindre la Résistance NIRD</div>
-                    </a>
-                    <p class="text-gray-400 text-sm mt-4 px-4">
-                        Découvre les alternatives libres, reprends le contrôle de tes données et contribue à un numérique éthique.
-                    </p>
+                    </div>
+                </a>
+                
+                <!-- Séparateur retro -->
+                <div class="my-8 md:my-0">
+                    <div class="retro-border p-4">
+                        <div class="text-center text-yellow-400 text-2xl font-bold rotate-0 md:rotate-90">
+                            <span class="animate-pulse">VS</span>
+                        </div>
+                    </div>
                 </div>
                 
-                <!-- Séparateur -->
-                <div class="my-4 md:my-0 text-gray-600 font-bold text-xl">OU</div>
-                
-                <!-- Pilule Bleue -->
-                <div class="choice-group text-center w-full md:w-1/2">
-                    <div class="choice-label text-blue-400">CHOIX DE CONFORMITÉ</div>
-                    <a href="https://www.microsoft.com/windows" target="_blank" class="pill-btn pill-blue inline-block px-10 py-5 rounded-full text-xl font-bold">
-                        <div class="flex items-center justify-center gap-3">
-                            <span>Pilule Bleue</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                            </svg>
+                <!-- Pilule Bleue - Style Arcade -->
+                <a href="https://www.microsoft.com/windows" target="_blank" class="group relative w-full md:w-1/2 max-w-md">
+                    <div class="absolute -inset-4 bg-gradient-to-l from-blue-900/30 to-transparent rounded-3xl blur-lg group-hover:blur-xl transition-all duration-500"></div>
+                    
+                    <div class="relative retro-border p-2 h-full opacity-90 hover:opacity-100 transition-opacity">
+                        <div class="bg-black/90 p-8 h-full">
+                            <div class="flex items-center justify-between mb-6">
+                                <div class="text-blue-400 font-bold text-xl tracking-widest">[ P2 ]</div>
+                                <div class="text-gray-500">PLAYER 2</div>
+                            </div>
+                            
+                            <div class="text-center mb-8">
+                                <div class="inline-block px-6 py-3 bg-blue-900/50 border-2 border-blue-700 mb-4">
+                                    <h3 class="retro-button text-2xl md:text-3xl text-white" style="font-family: 'Orbitron', sans-serif;">
+                                        PILULE BLEUE
+                                    </h3>
+                                </div>
+                                <p class="text-gray-300 text-lg mb-6">
+                                    <span class="text-blue-400">>></span> RESTER EN MODE STANDARD
+                                </p>
+                                <p class="text-white">
+                                    Continuez comme avant, acceptez les mises à jour imposées,<br>
+                                    restez dans la matrice.
+                                </p>
+                            </div>
+                            
+                            <button class="retro-button blue-pill w-full py-5 text-xl font-bold rounded-none">
+                                [ EXECUTE: STATUS_QUO ]
+                            </button>
+                            
+                            <div class="mt-6 text-center text-gray-500 text-sm">
+                                <span class="text-red-400">▼</span> DÉCONSEILLÉ <span class="text-red-400">▼</span>
+                            </div>
                         </div>
-                        <div class="text-sm mt-2 opacity-90 font-normal">Restez dans la Matrice</div>
-                    </a>
-                    <p class="text-gray-400 text-sm mt-4 px-4">
-                        Accepte les mises à jour forcées, l'obsolescence programmée et la collecte permanente de données.
-                    </p>
-                </div>
+                    </div>
+                </a>
             </div>
-        </div>
+        </section>
         
-        <!-- Informations supplémentaires -->
-        <div class="mt-16 pt-8 border-t border-gray-800 fade-in-element delay-3">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-                <div class="p-4">
-                    <div class="text-green-400 text-2xl font-bold mb-2">+150K</div>
-                    <div class="text-gray-400 text-sm">Membres de la résistance</div>
-                </div>
-                <div class="p-4">
-                    <div class="text-green-400 text-2xl font-bold mb-2">100%</div>
-                    <div class="text-gray-400 text-sm">Logiciels libres & open-source</div>
-                </div>
-                <div class="p-4">
-                    <div class="text-green-400 text-2xl font-bold mb-2">24/7</div>
-                    <div class="text-gray-400 text-sm">Support communautaire actif</div>
+        <!-- Footer retro -->
+        <footer class="text-center pt-8 border-t border-green-900">
+            <div class="mb-6">
+                <div class="inline-flex space-x-6">
+                    <button class="text-green-400 hover:text-yellow-400 transition-colors" onclick="window.location.reload()">
+                        [ RELOAD SYSTEM ]
+                    </button>
+                    <button class="text-green-400 hover:text-yellow-400 transition-colors" onclick="showCredits()">
+                        [ VIEW CREDITS ]
+                    </button>
+                    <button class="text-green-400 hover:text-yellow-400 transition-colors" onclick="toggleSound()">
+                        [ SOUND: ON ]
+                    </button>
                 </div>
             </div>
-        </div>
+            
+            <div class="text-gray-600 text-sm font-mono">
+                N.I.R.D OS v2.0 © 2024 - RESISTANCE NUMERIQUE - ALL SYSTEMS OPERATIONAL
+            </div>
+            
+            <!-- Easter Egg -->
+            <div class="mt-8 opacity-10 hover:opacity-100 transition-opacity duration-1000">
+                <div class="text-xs text-center">
+                    <span class="cursor-pointer" onclick="easterEgg()">↑ ↑ ↓ ↓ ← → ← → B A START</span>
+                </div>
+            </div>
+        </footer>
     </div>
-
-    <!-- Script Matrix amélioré -->
+    
+    <!-- Scripts rétro gaming -->
     <script>
-        // Configuration de l'effet Matrix
-        const canvas = document.getElementById('matrix-canvas');
+        // Effet Matrix rain rétro
+        const canvas = document.getElementById('matrixCanvas');
         const ctx = canvas.getContext('2d');
         
-        // Caractères Matrix (plus variés)
-        const chars = "01アイウエオABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz$+-*/=%\"'#&_(),.;:?!\\|{}<>[]^~";
-        const matrix = chars.split("");
-        
-        let fontSize = 14;
-        let columns;
-        let drops = [];
-        
-        // Initialisation
-        function initMatrix() {
+        function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            
-            columns = Math.floor(canvas.width / fontSize);
-            drops = [];
-            
-            for(let i = 0; i < columns; i++) {
-                drops[i] = Math.floor(Math.random() * canvas.height / fontSize);
-            }
         }
         
-        // Dessin de l'effet Matrix
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        
+        const chars = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789$+-*/=%\"'#&_(),.;:?!\\|{}<>[]^~";
+        const matrix = chars.split("");
+        
+        const fontSize = 16;
+        let columns = canvas.width / fontSize;
+        let drops = Array(Math.floor(columns)).fill(1);
+        
         function drawMatrix() {
-            // Fond semi-transparent pour effet de traînée
-            ctx.fillStyle = 'rgba(10, 10, 10, 0.05)';
+            // Fond avec effet de traînée rétro
+            ctx.fillStyle = 'rgba(10, 10, 18, 0.05)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Couleur et style du texte
-            ctx.fillStyle = '#00ff95';
-            ctx.font = `${fontSize}px 'Courier New', monospace`;
+            // Style rétro pour les caractères
+            ctx.font = `${fontSize}px 'Press Start 2P', monospace`;
             
-            // Dessin des caractères
-            for(let i = 0; i < drops.length; i++) {
-                // Sélection aléatoire d'un caractère
+            for (let i = 0; i < drops.length; i++) {
+                // Caractère aléatoire
                 const char = matrix[Math.floor(Math.random() * matrix.length)];
                 
-                // Position
-                const x = i * fontSize;
-                const y = drops[i] * fontSize;
-                
-                // Dessin avec effet de dégradé
-                const gradient = ctx.createLinearGradient(x, y, x, y + fontSize * 3);
-                gradient.addColorStop(0, '#00ff95');
-                gradient.addColorStop(0.5, '#00cc77');
-                gradient.addColorStop(1, '#009955');
+                // Effet de dégradé vertical
+                const gradient = ctx.createLinearGradient(0, drops[i] * fontSize, 0, drops[i] * fontSize + 30);
+                gradient.addColorStop(0, '#00ff41');
+                gradient.addColorStop(0.5, '#00b3ff');
+                gradient.addColorStop(1, '#ff00ff');
                 
                 ctx.fillStyle = gradient;
-                ctx.fillText(char, x, y);
+                ctx.fillText(char, i * fontSize, drops[i] * fontSize);
                 
-                // Réinitialisation de la goutte quand elle sort de l'écran
-                if(y > canvas.height && Math.random() > 0.975) {
+                // Réinitialisation avec effet aléatoire
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
                     drops[i] = 0;
                 }
                 
-                // Déplacement vers le bas
                 drops[i]++;
             }
         }
         
-        // Gestion du redimensionnement
-        window.addEventListener('resize', initMatrix);
-        
-        // Initialisation et boucle d'animation
-        initMatrix();
-        const matrixInterval = setInterval(drawMatrix, 35);
-        
-        // Animation d'entrée des éléments
-        document.addEventListener('DOMContentLoaded', function() {
-            const fadeElements = document.querySelectorAll('.fade-in-element');
-            
-            fadeElements.forEach((element, index) => {
-                element.style.animationDelay = `${index * 0.2}s`;
-            });
+        // Animation loading
+        document.querySelector('.loading-screen .bg-green-500').addEventListener('animationend', function() {
+            this.style.width = '100%';
         });
         
-        // Effet d'interaction sur les boutons
-        document.querySelectorAll('.pill-btn').forEach(button => {
-            button.addEventListener('mouseenter', function() {
-                this.style.animation = 'pulseGlow 1.5s infinite';
-            });
+        // Effets sonores (simulés)
+        function toggleSound() {
+            const btn = document.querySelector('[onclick="toggleSound()"]');
+            const current = btn.textContent.includes('ON');
+            btn.textContent = current ? '[ SOUND: OFF ]' : '[ SOUND: ON ]';
             
-            button.addEventListener('mouseleave', function() {
-                this.style.animation = '';
-            });
+            // Effet visuel pour simuler le son
+            if (!current) {
+                document.body.style.animation = 'pixelate 0.3s';
+                setTimeout(() => {
+                    document.body.style.animation = '';
+                }, 300);
+            }
+        }
+        
+        // Easter egg
+        function easterEgg() {
+            const title = document.querySelector('.retro-title');
+            title.style.animation = 'glitch 0.5s infinite';
+            document.body.style.background = 'radial-gradient(circle, #ff00ff, #00ff41, #00b3ff)';
+            
+            setTimeout(() => {
+                title.style.animation = '';
+                document.body.style.background = '';
+            }, 3000);
+            
+            // Message secret
+            const secret = document.createElement('div');
+            secret.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 retro-border p-8 bg-black z-50';
+            secret.innerHTML = `
+                <div class="text-center">
+                    <div class="text-green-400 text-2xl mb-4">EASTER EGG ACTIVATED!</div>
+                    <div class="text-white mb-6">THE MATRIX HAS YOU...</div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="retro-button px-6 py-3 bg-red-500">
+                        [ CLOSE ]
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(secret);
+        }
+        
+        // Credits
+        function showCredits() {
+            const credits = document.createElement('div');
+            credits.className = 'fixed top-0 left-0 w-full h-full bg-black/90 flex items-center justify-center z-50';
+            credits.innerHTML = `
+                <div class="retro-border p-8 max-w-2xl w-full mx-4">
+                    <div class="text-center mb-8">
+                        <h3 class="text-green-400 text-3xl mb-4">N.I.R.D OS CREDITS</h3>
+                        <div class="space-y-4 text-left text-white">
+                            <div class="flex justify-between">
+                                <span>SYSTEM DESIGN:</span>
+                                <span class="text-green-400">NIRD TEAM</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>RETRO ENGINE:</span>
+                                <span class="text-green-400">80s/90s TECH</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>RESISTANCE LEADER:</span>
+                                <span class="text-green-400">NEO [CLASSIFIED]</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>SPECIAL THANKS:</span>
+                                <span class="text-green-400">THE FREE SOFTWARE COMMUNITY</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button onclick="this.parentElement.parentElement.remove()" class="retro-button px-6 py-3 bg-green-500">
+                            [ RETURN TO SYSTEM ]
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(credits);
+        }
+        
+        // Animation de la barre de chargement
+        const loadBar = document.querySelector('.loading-screen .bg-green-500');
+        loadBar.style.animation = 'load 3s ease-in-out forwards';
+        
+        // Définir l'animation de chargement
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes load {
+                0% { width: 0%; }
+                100% { width: 100%; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Démarrer l'animation Matrix
+        setInterval(drawMatrix, 50);
+        
+        // Effet de frappe au clavier
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const redPill = document.querySelector('.red-pill');
+                redPill.style.animation = 'glitch 0.3s';
+                setTimeout(() => {
+                    redPill.style.animation = '';
+                }, 300);
+            }
         });
     </script>
 </body>
