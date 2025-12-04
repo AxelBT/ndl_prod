@@ -1,0 +1,19 @@
+{
+  "etablissement": [
+    "Diagnostiquer le parc informatique",
+    "Tester un poste Linux",
+    "Identifier les dépendances MS",
+    "Organiser un atelier numérique"
+  ],
+  "collectivite": [
+    "Analyser les contrats logiciels",
+    "Proposer une feuille de route Linux",
+    "Créer une école pilote"
+  ],
+  "individu": [
+    "Installer Linux",
+    "Tester 3 logiciels libres",
+    "Réduire l’obsolescence",
+    "Rejoindre Tchap"
+  ]
+}

@@ -4,153 +4,389 @@
     <meta charset="UTF-8">
     <title>NIRD – Résistance Numérique</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- Style Matrix -->
+    <!-- Tailwind CDN (comme spécifié dans la demande) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Styles personnalisés -->
     <style>
+        /* Palette de couleurs améliorée */
+        :root {
+            --matrix-primary: #00ff95;
+            --matrix-primary-dark: #00cc77;
+            --matrix-secondary: #ff0033;
+            --matrix-secondary-light: #ff3366;
+            --matrix-blue: #0066ff;
+            --matrix-blue-light: #3399ff;
+            --matrix-bg: #0a0a0a;
+            --matrix-bg-light: #121212;
+            --matrix-text: #e0e0e0;
+            --matrix-text-light: #ffffff;
+        }
+        
         body {
             margin: 0;
             padding: 0;
-            overflow: hidden;
-            background: black;
-            font-family: "Courier New", monospace;
-            color: #00ff95;
-            text-align: center;
+            overflow-x: hidden;
+            background: var(--matrix-bg);
+            font-family: 'Segoe UI', 'Courier New', system-ui, -apple-system, sans-serif;
+            color: var(--matrix-text);
+            min-height: 100vh;
+            position: relative;
         }
-
-        canvas {
+        
+        /* Effet Matrix subtil en arrière-plan */
+        #matrix-canvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             z-index: -1;
+            opacity: 0.3; /* Réduit pour améliorer la lisibilité */
         }
-
-        .content {
-            margin-top: 15vh;
-            padding: 20px;
-            animation: fadeIn 2s ease-in-out;
+        
+        /* Animation d'entrée améliorée */
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
         }
-
-        h1 {
-            font-size: 2.8rem;
-            margin-bottom: 20px;
+        
+        @keyframes pulseGlow {
+            0%, 100% { 
+                box-shadow: 0 0 10px rgba(0, 255, 149, 0.3);
+            }
+            50% { 
+                box-shadow: 0 0 20px rgba(0, 255, 149, 0.6);
+            }
         }
-
-        p {
-            font-size: 1.2rem;
-            max-width: 750px;
-            margin: 0 auto 30px;
-            line-height: 1.4em;
+        
+        /* Amélioration de la lisibilité du texte */
+        .content-container {
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(0, 255, 149, 0.1);
         }
-
-        .choices {
-            margin-top: 40px;
+        
+        /* Style des boutons améliorés */
+        .pill-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
-
-        .pill {
-            display: inline-block;
-            padding: 15px 40px;
-            margin: 10px;
-            border-radius: 30px;
-            font-size: 1.3rem;
-            cursor: pointer;
-            transition: 0.3s;
-            border: 2px solid white;
-            text-decoration: none;
+        
+        .pill-btn:hover {
+            transform: translateY(-5px) scale(1.03);
         }
-
-        .red {
-            background: #ff0033;
+        
+        .pill-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.7s;
+        }
+        
+        .pill-btn:hover::before {
+            left: 100%;
+        }
+        
+        .pill-red {
+            background: linear-gradient(135deg, var(--matrix-secondary), #c00028);
             color: white;
+            border: 2px solid rgba(255, 0, 51, 0.5);
         }
-        .red:hover {
-            background: #ff335c;
+        
+        .pill-red:hover {
+            background: linear-gradient(135deg, var(--matrix-secondary-light), #e00030);
+            box-shadow: 0 10px 25px rgba(255, 0, 51, 0.4);
         }
-
-        .blue {
-            background: #0066ff;
+        
+        .pill-blue {
+            background: linear-gradient(135deg, var(--matrix-blue), #0047b3);
             color: white;
+            border: 2px solid rgba(0, 102, 255, 0.5);
         }
-        .blue:hover {
-            background: #3385ff;
+        
+        .pill-blue:hover {
+            background: linear-gradient(135deg, var(--matrix-blue-light), #005ce6);
+            box-shadow: 0 10px 25px rgba(0, 102, 255, 0.4);
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+        
+        /* Amélioration de la typographie */
+        .title-text {
+            color: var(--matrix-text-light);
+            font-weight: 800;
+            line-height: 1.2;
+            text-shadow: 0 0 15px rgba(0, 255, 149, 0.5);
+            background: linear-gradient(90deg, #00ff95, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .highlight {
+            color: var(--matrix-primary);
+            font-weight: 700;
+        }
+        
+        /* Indicateur de choix */
+        .choice-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+        
+        /* Responsive amélioré */
+        @media (max-width: 768px) {
+            .content-container {
+                margin: 20px;
+                padding: 25px !important;
+            }
+            
+            .title-text {
+                font-size: 2.5rem !important;
+            }
+            
+            .choices-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .pill-btn {
+                width: 100%;
+                max-width: 320px;
+                margin-bottom: 15px;
+            }
+        }
+        
+        /* Animation pour les éléments de texte */
+        .fade-in-element {
+            animation: fadeInUp 0.8s ease-out forwards;
+            opacity: 0;
+        }
+        
+        .delay-1 {
+            animation-delay: 0.3s;
+        }
+        
+        .delay-2 {
+            animation-delay: 0.6s;
+        }
+        
+        .delay-3 {
+            animation-delay: 0.9s;
         }
     </style>
-
 </head>
-<body>
-
-<canvas id="matrix"></canvas>
-
-<div class="content">
-    <h1>Bienvenue dans la Résistance Numérique NIRD</h1>
-
-    <p>
-        À l’heure où la fin du support de Windows 10 nous rappelle notre dépendance technologique,
-        une nouvelle voie s’ouvre.
-        <br>
-        Un numérique plus <strong>Inclusif</strong>, <strong>Responsable</strong>, et <strong>Durable</strong>.
-        <br><br>
-        Quel chemin choisiras-tu ?
-    </p>
-
-    <div class="choices">
-        <a href="/choose-role" class="pill red">Pilule Rouge — Rejoindre la Résistance</a>
-        <a href="https://www.microsoft.com/windows" class="pill blue">Pilule Bleue — Obsolescence Programmée</a>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <!-- Canvas pour l'effet Matrix -->
+    <canvas id="matrix-canvas"></canvas>
+    
+    <!-- Contenu principal -->
+    <div class="content-container max-w-4xl w-full p-10 fade-in-element">
+        <!-- En-tête -->
+        <div class="text-center mb-10 fade-in-element">
+            <div class="mb-4">
+                <span class="inline-block px-4 py-2 rounded-full bg-gray-900 text-green-400 text-sm font-semibold border border-green-500/30">
+                    #RésistanceNumérique
+                </span>
+            </div>
+            <h1 class="title-text text-5xl md:text-6xl mb-6">
+                NIRD — Nouvelle Initiative pour un Numérique Responsable & Durable
+            </h1>
+        </div>
+        
+        <!-- Introduction améliorée -->
+        <div class="mb-12 fade-in-element delay-1">
+            <p class="text-xl leading-relaxed mb-6 text-gray-300">
+                La fin du support de <span class="highlight">Windows 10</span> marque un tournant critique : 
+                des millions d'utilisateurs sont contraints à l'obsolescence programmée, accentuant la fracture numérique et notre dépendance technologique.
+            </p>
+            
+            <div class="bg-gray-900/50 border-l-4 border-green-500 p-6 rounded-r-lg mb-8">
+                <p class="text-lg italic text-gray-200">
+                    "Un autre chemin est possible : un numérique <span class="font-bold text-green-400">inclusif</span>, 
+                    <span class="font-bold text-green-400">responsable</span> et <span class="font-bold text-green-400">durable</span>, 
+                    respectueux de vos données, de votre autonomie et de notre planète."
+                </p>
+            </div>
+            
+            <p class="text-xl leading-relaxed text-gray-300">
+                Face à ce choix crucial, quel chemin emprunteras-tu ? La soumission à l'obsolescence programmée, 
+                ou la reconquête de ta souveraineté numérique ?
+            </p>
+        </div>
+        
+        <!-- Choix améliorés -->
+        <div class="fade-in-element delay-2">
+            <p class="text-center text-gray-400 mb-8 text-lg">
+                Sélectionne ta voie :
+            </p>
+            
+            <div class="choices-container flex flex-col md:flex-row justify-center items-center gap-6 md:gap-8">
+                <!-- Pilule Rouge -->
+                <div class="choice-group text-center w-full md:w-1/2">
+                    <div class="choice-label text-red-400">CHOIX DE LIBÉRATION</div>
+                    <a href="/choose-role" class="pill-btn pill-red inline-block px-10 py-5 rounded-full text-xl font-bold">
+                        <div class="flex items-center justify-center gap-3">
+                            <span>Pilule Rouge</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </div>
+                        <div class="text-sm mt-2 opacity-90 font-normal">Rejoindre la Résistance NIRD</div>
+                    </a>
+                    <p class="text-gray-400 text-sm mt-4 px-4">
+                        Découvre les alternatives libres, reprends le contrôle de tes données et contribue à un numérique éthique.
+                    </p>
+                </div>
+                
+                <!-- Séparateur -->
+                <div class="my-4 md:my-0 text-gray-600 font-bold text-xl">OU</div>
+                
+                <!-- Pilule Bleue -->
+                <div class="choice-group text-center w-full md:w-1/2">
+                    <div class="choice-label text-blue-400">CHOIX DE CONFORMITÉ</div>
+                    <a href="https://www.microsoft.com/windows" target="_blank" class="pill-btn pill-blue inline-block px-10 py-5 rounded-full text-xl font-bold">
+                        <div class="flex items-center justify-center gap-3">
+                            <span>Pilule Bleue</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                            </svg>
+                        </div>
+                        <div class="text-sm mt-2 opacity-90 font-normal">Restez dans la Matrice</div>
+                    </a>
+                    <p class="text-gray-400 text-sm mt-4 px-4">
+                        Accepte les mises à jour forcées, l'obsolescence programmée et la collecte permanente de données.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Informations supplémentaires -->
+        <div class="mt-16 pt-8 border-t border-gray-800 fade-in-element delay-3">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                <div class="p-4">
+                    <div class="text-green-400 text-2xl font-bold mb-2">+150K</div>
+                    <div class="text-gray-400 text-sm">Membres de la résistance</div>
+                </div>
+                <div class="p-4">
+                    <div class="text-green-400 text-2xl font-bold mb-2">100%</div>
+                    <div class="text-gray-400 text-sm">Logiciels libres & open-source</div>
+                </div>
+                <div class="p-4">
+                    <div class="text-green-400 text-2xl font-bold mb-2">24/7</div>
+                    <div class="text-gray-400 text-sm">Support communautaire actif</div>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
 
-<script>
-    // Effet Matrix code rain
-    const canvas = document.getElementById('matrix');
-    const ctx = canvas.getContext('2d');
-
-    canvas.height = window.innerHeight;
-    canvas.width = window.innerWidth;
-
-    const letters = "01ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const matrix = letters.split("");
-
-    const fontSize = 16;
-    const columns = canvas.width / fontSize;
-
-    const drops = [];
-    for (let x = 0; x < columns; x++) {
-        drops[x] = Math.floor(Math.random() * 100);
-    }
-
-    function draw() {
-        ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        ctx.fillStyle = "#00ff95";
-        ctx.font = fontSize + "px monospace";
-
-        for (let i = 0; i < drops.length; i++) {
-            const text = matrix[Math.floor(Math.random() * matrix.length)];
-            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-            if (drops[i] * fontSize > canvas.height && Math.random() > 0.95) {
-                drops[i] = 0;
+    <!-- Script Matrix amélioré -->
+    <script>
+        // Configuration de l'effet Matrix
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Caractères Matrix (plus variés)
+        const chars = "01アイウエオABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz$+-*/=%\"'#&_(),.;:?!\\|{}<>[]^~";
+        const matrix = chars.split("");
+        
+        let fontSize = 14;
+        let columns;
+        let drops = [];
+        
+        // Initialisation
+        function initMatrix() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            columns = Math.floor(canvas.width / fontSize);
+            drops = [];
+            
+            for(let i = 0; i < columns; i++) {
+                drops[i] = Math.floor(Math.random() * canvas.height / fontSize);
             }
-
-            drops[i]++;
         }
-    }
-
-    setInterval(draw, 35);
-
-    // Ajuste la taille au redimensionnement
-    window.addEventListener("resize", () => {
-        canvas.height = window.innerHeight;
-        canvas.width = window.innerWidth;
-    });
-</script>
-
+        
+        // Dessin de l'effet Matrix
+        function drawMatrix() {
+            // Fond semi-transparent pour effet de traînée
+            ctx.fillStyle = 'rgba(10, 10, 10, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Couleur et style du texte
+            ctx.fillStyle = '#00ff95';
+            ctx.font = `${fontSize}px 'Courier New', monospace`;
+            
+            // Dessin des caractères
+            for(let i = 0; i < drops.length; i++) {
+                // Sélection aléatoire d'un caractère
+                const char = matrix[Math.floor(Math.random() * matrix.length)];
+                
+                // Position
+                const x = i * fontSize;
+                const y = drops[i] * fontSize;
+                
+                // Dessin avec effet de dégradé
+                const gradient = ctx.createLinearGradient(x, y, x, y + fontSize * 3);
+                gradient.addColorStop(0, '#00ff95');
+                gradient.addColorStop(0.5, '#00cc77');
+                gradient.addColorStop(1, '#009955');
+                
+                ctx.fillStyle = gradient;
+                ctx.fillText(char, x, y);
+                
+                // Réinitialisation de la goutte quand elle sort de l'écran
+                if(y > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                
+                // Déplacement vers le bas
+                drops[i]++;
+            }
+        }
+        
+        // Gestion du redimensionnement
+        window.addEventListener('resize', initMatrix);
+        
+        // Initialisation et boucle d'animation
+        initMatrix();
+        const matrixInterval = setInterval(drawMatrix, 35);
+        
+        // Animation d'entrée des éléments
+        document.addEventListener('DOMContentLoaded', function() {
+            const fadeElements = document.querySelectorAll('.fade-in-element');
+            
+            fadeElements.forEach((element, index) => {
+                element.style.animationDelay = `${index * 0.2}s`;
+            });
+        });
+        
+        // Effet d'interaction sur les boutons
+        document.querySelectorAll('.pill-btn').forEach(button => {
+            button.addEventListener('mouseenter', function() {
+                this.style.animation = 'pulseGlow 1.5s infinite';
+            });
+            
+            button.addEventListener('mouseleave', function() {
+                this.style.animation = '';
+            });
+        });
+    </script>
 </body>
 </html>

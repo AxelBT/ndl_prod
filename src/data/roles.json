@@ -1,0 +1,53 @@
+{
+  "etablissement": {
+    "label": "Établissement scolaire",
+    "missions": [
+      "Découvrir la démarche NIRD",
+      "Choisir une distribution Linux adaptée à la pédagogie",
+      "Mettre en place une salle informatique Linux",
+      "Installer des logiciels libres pour les élèves",
+      "Reconditionner du matériel",
+      "Découvrir les retours des établissements pilotes"
+    ],
+    "links": {
+      "démarche": "https://nird.education/demarche",
+      "linux": "https://nird.education/linux",
+      "outils": "https://nird.education/boite-a-outils",
+      "reconditionnement": "https://nird.education/reconditionnement",
+      "pilotes": "https://nird.education/pilotes"
+    }
+  },
+
+  "collectivite": {
+    "label": "Collectivité territoriale",
+    "missions": [
+      "Évaluer l'impact environnemental et financier du parc informatique",
+      "Estimer les économies d’un passage massif à Linux",
+      "Aider les établissements du territoire à adopter le libre",
+      "Déployer Linux à grande échelle",
+      "Mettre en place une politique de reconditionnement"
+    ],
+    "links": {
+      "collectivités": "https://nird.education/collectivites",
+      "reconditionnement": "https://nird.education/reconditionnement"
+    }
+  },
+
+  "individu": {
+    "label": "Individu / Enseignant / Technicien",
+    "missions": [
+      "Installer Linux facilement",
+      "Choisir une distribution adaptée à son usage",
+      "Accéder à la Boîte à outils",
+      "Découvrir les logiciels libres pour un usage quotidien",
+      "Rejoindre la communauté Tchap + Mastodon + GitLab"
+    ],
+    "links": {
+      "linux": "https://nird.education/linux",
+      "outils": "https://nird.education/boite-a-outils",
+      "tchap": "https://apps.education.fr/nextcloud/index.php/s/TCHAP",
+      "mastodon": "https://masto.nird.education",
+      "gitlab": "https://gitlab.forge.apps.education.fr/nird"
+    }
+  }
+}
