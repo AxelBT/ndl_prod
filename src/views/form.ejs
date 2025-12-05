@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Contact Form – Matrix Style</title>
+<script type="text/javascript" src="mail.js"></script>
+    <meta name="description" content="Description de la page">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+       (function(){
+          emailjs.init({
+            publicKey: "vGR9qzF_HCZEjpXfX",
+          });
+       })();
+    </script>
+<style>
+    body {
+        background: black;
+        color: #00ff00;
+        font-family: "Courier New", monospace;
+        padding: 40px;
+    }
+
+    h1 {
+        text-align: center;
+        color: #00ff00;
+        text-shadow: 0 0 10px #00ff00;
+        margin-bottom: 30px;
+    }
+
+    .matrix-form {
+        width: 400px;
+        margin: 0 auto;
+        padding: 25px;
+        border: 1px solid #00ff00;
+        box-shadow: 0 0 15px #00ff00;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    input, textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+        background: black;
+        border: 1px solid #00ff00;
+        color: #00ff00;
+        font-family: "Courier New", monospace;
+    }
+
+    input:focus, textarea:focus {
+        box-shadow: 0 0 8px #00ff00;
+        outline: none;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        background: black;
+        border: 1px solid #00ff00;
+        color: #00ff00;
+        font-family: "Courier New", monospace;
+        cursor: pointer;
+        font-size: 16px;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+    }
+
+    button:hover {
+        background: #003300;
+        box-shadow: 0 0 15px #00ff00;
+    }
+
+    /* Matrix falling code animation background */
+    canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: -1;
+    }
+</style>
+</head>
+<body>
+
+<canvas id="matrix"></canvas>
+
+<h1>Enter the Matrix</h1>
+
+<form class="matrix-form" action="" method="get">
+    <label>Name</label>
+    <input type="text" name="name" id="name" required>
+
+    <label>Email</label>
+    <input type="email" name="email" id="email" required>
+
+    <input type="button" onclick="sendmail()" value="Send Transmission" />
+</form>
+
+<script>
+    // Matrix rain background animation
+    let canvas = document.getElementById("matrix");
+    let ctx = canvas.getContext("2d");
+
+    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+
+    let letters = "01";
+    letters = letters.split("");
+
+    let fontSize = 14;
+    let columns = canvas.width / fontSize;
+
+    let drops = [];
+    for (let i = 0; i < columns; i++) drops[i] = 1;
+
+    function draw() {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = "#00ff00";
+        ctx.font = fontSize + "px monospace";
+
+        for (let i = 0; i < drops.length; i++) {
+            let text = letters[Math.floor(Math.random() * letters.length)];
+            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+            if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                drops[i] = 0;
+            }
+
+            drops[i]++;
+        }
+    }
+
+    setInterval(draw, 35);
+</script>
+
+</body>
+</html>
+
+
+

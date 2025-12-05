@@ -560,12 +560,16 @@
                     <button class="text-green-400 hover:text-yellow-400 transition-colors" onclick="window.location.reload()">
                         [ RELOAD SYSTEM ]
                     </button>
-                    <button class="text-green-400 hover:text-yellow-400 transition-colors" onclick="showCredits()">
-                        [ VIEW CREDITS ]
+                    <button class="text-green-400 hover:text-yellow-400 transition-colors" onclick="showSound()">
+                        [ AUDIO VIZUALIZER ]
                     </button>
                     <button class="text-green-400 hover:text-yellow-400 transition-colors" onclick="toggleSound()">
                         [ SOUND: ON ]
                     </button>
+                    <button class="text-green-400 hover:text-yellow-400 transition-colors" onclick="showForm()">
+                        [ FORMULAIRE GLORIEUX ]
+                    </button>
+                     
                 </div>
             </div>
             
@@ -652,6 +656,14 @@
                 }, 300);
             }
         }
+
+        function showSound() {
+    window.location.href = '/audio';
+}
+
+    function showForm() {
+    window.location.href = '/form';
+}
         
         // Easter egg
         function easterEgg() {

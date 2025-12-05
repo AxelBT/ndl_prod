@@ -36,6 +36,10 @@ app.get("/audio", (req, res) => {
   res.render("audio");
 });
 
+app.get("/form", (req, res) => {
+  res.render("form");
+});
+
 app.get("/choose-role", (req, res) => {
   res.render("choose-role");
 });
