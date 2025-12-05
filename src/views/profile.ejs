@@ -1,96 +1,785 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Profil — Résistance NIRD</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Tailwind CSS -->
-  <link href="/css/output.css" rel="stylesheet">
-
-  <style>
-    /* Hover léger sur les étapes */
-    .step:hover {
-      background-color: #e6ffed;
-      transform: translateY(-2px);
-      transition: all 0.2s ease-in-out;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <title>Profil — Résistance NIRD</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        :root {
+            --nird-green: #10b981;
+            --nird-green-dark: #059669;
+            --nird-blue: #3b82f6;
+            --nird-purple: #8b5cf6;
+            --nird-amber: #f59e0b;
+        }
+        
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            min-height: 100vh;
+        }
+        
+        .profile-header {
+            background: linear-gradient(135deg, var(--nird-green) 0%, var(--nird-green-dark) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .profile-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        
+        .mission-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .mission-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--nird-green);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .mission-card:hover::before {
+            transform: scaleY(1);
+        }
+        
+        .mission-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .badge {
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+        }
+        
+        .badge:hover {
+            transform: translateY(-8px) rotateX(10deg);
+        }
+        
+        .badge-locked {
+            filter: grayscale(1) opacity(0.6);
+        }
+        
+        .badge-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #e5e7eb;
+            border-radius: 0 0 8px 8px;
+            overflow: hidden;
+        }
+        
+        .badge-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--nird-green), var(--nird-blue));
+            transition: width 0.5s ease;
+        }
+        
+        .achievement-animation {
+            animation: celebrate 2s ease-out;
+        }
+        
+        @keyframes celebrate {
+            0% { transform: scale(0.5) rotate(-180deg); opacity: 0; }
+            50% { transform: scale(1.2) rotate(0deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+        }
+        
+        .progress-ring {
+            transition: stroke-dashoffset 0.5s ease;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        
+        .role-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+        
+        .role-etablissement {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1));
+            border: 2px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .role-collectivite {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.1));
+            border: 2px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .role-individu {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(124, 58, 237, 0.1));
+            border: 2px solid rgba(139, 92, 246, 0.3);
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            border-color: var(--nird-green);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .link-card {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .link-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.1), transparent);
+            transition: left 0.6s;
+        }
+        
+        .link-card:hover::before {
+            left: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .role-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+            }
+        }
+    </style>
 </head>
 
-<body class="bg-gray-50 text-gray-800 min-h-screen font-sans">
-
-  <!-- Conteneur principal -->
-  <div class="max-w-5xl mx-auto py-12 px-6">
-
-    <!-- Titre -->
-    <h1 class="text-4xl md:text-5xl font-bold text-center text-green-700 mb-12">
-      Bienvenue Résistant · <%= roleData.label %>
-    </h1>
-
-    <!-- Introduction personnalisée -->
-    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-12">
-      <% if (role === "etablissement") { %>
-        <p class="text-lg">
-          🎓 En tant qu'Établissement Résistant, vous guidez élèves et équipes vers un numérique inclusif, souverain et durable.
-        </p>
-      <% } else if (role === "collectivite") { %>
-        <p class="text-lg">
-          🏛️ Collectivité Engagée : vous contribuez à un numérique public responsable, aidant de nombreux établissements à se libérer de l'obsolescence programmée.
-        </p>
-      <% } else { %>
-        <p class="text-lg">
-          👤 Résistant Libre : chaque geste compte. Vous êtes l’acteur direct du libre et de la sobriété numérique au quotidien.
-        </p>
-      <% } %>
-    </div>
-
-    <!-- SECTION: Missions -->
-    <h2 class="text-2xl font-bold text-green-700 mb-6">🎯 Missions clés</h2>
-
-    <div class="space-y-6">
-      <% missions.forEach((mission, index) => { %>
-        <div class="step flex items-start bg-white p-5 rounded-lg shadow-sm border border-gray-200">
-          <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-green-700 text-white font-bold mr-4">
-            <%= index + 1 %>
-          </div>
-          <p class="text-gray-800 text-lg"><%= mission %></p>
+<body>
+    <!-- En-tête du profil -->
+    <header class="profile-header text-white py-12 px-6">
+        <div class="max-w-6xl mx-auto relative">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+                <div class="text-center md:text-left">
+                    <div class="flex items-center justify-center md:justify-start gap-4 mb-6">
+                        <div class="role-icon">
+                            <i class="fas fa-school text-green-600"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-3xl md:text-4xl font-bold">Bienvenue Résistant</h1>
+                            <p class="text-xl md:text-2xl text-green-100 font-semibold mt-2">Établissement Scolaire</p>
+                        </div>
+                    </div>
+                    
+                    <p class="text-lg text-green-100 max-w-2xl">
+                        🎓 Vous guidez élèves et équipes vers un numérique inclusif, souverain et durable.
+                        <span class="block mt-2 text-green-50">Progression globale : <span id="globalProgress">45</span>%</span>
+                    </p>
+                </div>
+                
+                <div class="relative">
+                    <div class="w-32 h-32 relative">
+                        <svg class="w-full h-full" viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" stroke-width="8"/>
+                            <circle id="progressCircle" class="progress-ring" cx="50" cy="50" r="45" fill="none" stroke="#10b981" stroke-width="8" stroke-dasharray="283" stroke-dashoffset="155" stroke-linecap="round"/>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span class="text-3xl font-bold text-white" id="globalProgress2">45%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      <% }); %>
+    </header>
+
+    <!-- Contenu principal -->
+    <main class="max-w-6xl mx-auto py-12 px-6">
+        <!-- Section Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div class="stats-card p-6 rounded-2xl">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-sm text-gray-500">Missions accomplies</p>
+                        <p class="text-3xl font-bold text-gray-800">3/8</p>
+                    </div>
+                    <i class="fas fa-check-circle text-3xl text-green-500"></i>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-green-500 h-2 rounded-full" style="width: 37.5%"></div>
+                </div>
+            </div>
+            
+            <div class="stats-card p-6 rounded-2xl">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-sm text-gray-500">Badges débloqués</p>
+                        <p class="text-3xl font-bold text-gray-800">2/12</p>
+                    </div>
+                    <i class="fas fa-medal text-3xl text-amber-500"></i>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-amber-500 h-2 rounded-full" style="width: 16.6%"></div>
+                </div>
+            </div>
+            
+            <div class="stats-card p-6 rounded-2xl">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-sm text-gray-500">Impact estimé</p>
+                        <p class="text-3xl font-bold text-gray-800">120kg</p>
+                    </div>
+                    <i class="fas fa-leaf text-3xl text-emerald-500"></i>
+                </div>
+                <p class="text-sm text-gray-600">CO² économisé</p>
+            </div>
+        </div>
+
+        <!-- Section Missions -->
+        <section class="mb-16">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-3">
+                    <i class="fas fa-bullseye text-green-600"></i>
+                    Missions clés
+                </h2>
+                <div class="bg-green-50 text-green-700 px-4 py-2 rounded-full font-medium">
+                    <i class="fas fa-fire mr-2"></i>
+                    3 objectifs en cours
+                </div>
+            </div>
+            
+            <div class="space-y-4" id="missionsContainer">
+                <!-- Mission 1 -->
+                <div class="mission-card bg-white p-6 rounded-xl border border-gray-200 flex items-start gap-4">
+                    <div class="flex-shrink-0">
+                        <button class="mission-toggle w-8 h-8 rounded-full border-2 border-green-500 flex items-center justify-center transition-all hover:bg-green-50" data-mission="1">
+                            <i class="fas fa-check text-green-500"></i>
+                        </button>
+                    </div>
+                    <div class="flex-grow">
+                        <h3 class="font-semibold text-lg text-gray-800 mb-2">Migration vers Linux</h3>
+                        <p class="text-gray-600 mb-3">Installer une distribution Linux sur au moins 10 postes de l'établissement.</p>
+                        <div class="flex items-center gap-4 text-sm">
+                            <span class="text-green-600 font-medium"><i class="fas fa-bolt mr-1"></i> Impact élevé</span>
+                            <span class="text-amber-600 font-medium"><i class="fas fa-clock mr-1"></i> 15 jours estimés</span>
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">+150 pts</span>
+                    </div>
+                </div>
+                
+                <!-- Mission 2 -->
+                <div class="mission-card bg-white p-6 rounded-xl border border-gray-200 flex items-start gap-4">
+                    <div class="flex-shrink-0">
+                        <button class="mission-toggle w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all hover:bg-green-50" data-mission="2">
+                            <i class="fas fa-plus text-gray-400"></i>
+                        </button>
+                    </div>
+                    <div class="flex-grow">
+                        <h3 class="font-semibold text-lg text-gray-800 mb-2">Atelier de sensibilisation</h3>
+                        <p class="text-gray-600 mb-3">Organiser un atelier sur la sobriété numérique pour les élèves.</p>
+                        <div class="flex items-center gap-4 text-sm">
+                            <span class="text-green-600 font-medium"><i class="fas fa-users mr-1"></i> Impact collectif</span>
+                            <span class="text-blue-600 font-medium"><i class="fas fa-clock mr-1"></i> 7 jours estimés</span>
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">+100 pts</span>
+                    </div>
+                </div>
+                
+                <!-- Mission 3 -->
+                <div class="mission-card bg-white p-6 rounded-xl border border-gray-200 flex items-start gap-4">
+                    <div class="flex-shrink-0">
+                        <button class="mission-toggle w-8 h-8 rounded-full border-2 border-green-500 flex items-center justify-center transition-all hover:bg-green-50" data-mission="3">
+                            <i class="fas fa-check text-green-500"></i>
+                        </button>
+                    </div>
+                    <div class="flex-grow">
+                        <h3 class="font-semibold text-lg text-gray-800 mb-2">Création d'un club informatique</h3>
+                        <p class="text-gray-600 mb-3">Mettre en place un club dédié au reconditionnement et au libre.</p>
+                        <div class="flex items-center gap-4 text-sm">
+                            <span class="text-purple-600 font-medium"><i class="fas fa-graduation-cap mr-1"></i> Pédagogique</span>
+                            <span class="text-amber-600 font-medium"><i class="fas fa-clock mr-1"></i> 30 jours estimés</span>
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">+200 pts</span>
+                    </div>
+                </div>
+                
+                <!-- Mission 4 -->
+                <div class="mission-card bg-white p-6 rounded-xl border border-gray-200 flex items-start gap-4">
+                    <div class="flex-shrink-0">
+                        <button class="mission-toggle w-8 h-8 rounded-full border-2 border-green-500 flex items-center justify-center transition-all hover:bg-green-50" data-mission="4">
+                            <i class="fas fa-check text-green-500"></i>
+                        </button>
+                    </div>
+                    <div class="flex-grow">
+                        <h3 class="font-semibold text-lg text-gray-800 mb-2">Audit énergétique</h3>
+                        <p class="text-gray-600 mb-3">Réaliser un audit de la consommation numérique de l'établissement.</p>
+                        <div class="flex items-center gap-4 text-sm">
+                            <span class="text-emerald-600 font-medium"><i class="fas fa-leaf mr-1"></i> Écologique</span>
+                            <span class="text-blue-600 font-medium"><i class="fas fa-clock mr-1"></i> 10 jours estimés</span>
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-medium">+120 pts</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 text-center">
+                <button class="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors">
+                    <i class="fas fa-plus mr-2"></i>
+                    Voir toutes les missions (8)
+                </button>
+            </div>
+        </section>
+
+        <!-- Section Badges -->
+        <section class="mb-16">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-3">
+                    <i class="fas fa-medal text-amber-500"></i>
+                    Badges NIRD
+                    <span class="text-sm font-normal text-gray-500">(2 débloqués / 12)</span>
+                </h2>
+                <div class="text-sm text-gray-600">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Les badges se débloquent automatiquement
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="badgesContainer">
+                <!-- Badge 1 : Pingouin Initié -->
+                <div class="badge bg-white p-5 rounded-xl border-2 border-green-300 text-center">
+                    <div class="text-4xl mb-3">🐧</div>
+                    <h4 class="font-bold text-gray-800 mb-1">Pingouin Initié</h4>
+                    <p class="text-sm text-gray-600 mb-3">Première installation Linux réussie</p>
+                    <div class="badge-progress">
+                        <div class="badge-progress-fill" style="width: 100%"></div>
+                    </div>
+                    <div class="absolute top-2 right-2">
+                        <i class="fas fa-check-circle text-green-500"></i>
+                    </div>
+                </div>
+                
+                <!-- Badge 2 : Reconditionneur -->
+                <div class="badge bg-white p-5 rounded-xl border-2 border-emerald-300 text-center">
+                    <div class="text-4xl mb-3">♻️</div>
+                    <h4 class="font-bold text-gray-800 mb-1">Reconditionneur</h4>
+                    <p class="text-sm text-gray-600 mb-3">5 appareils donnés une seconde vie</p>
+                    <div class="badge-progress">
+                        <div class="badge-progress-fill" style="width: 60%"></div>
+                    </div>
+                    <div class="absolute top-2 right-2">
+                        <i class="fas fa-check-circle text-green-500"></i>
+                    </div>
+                </div>
+                
+                <!-- Badge 3 : Souveraineté Numérique -->
+                <div class="badge badge-locked bg-gray-50 p-5 rounded-xl border-2 border-gray-200 text-center">
+                    <div class="text-4xl mb-3 opacity-50">🔐</div>
+                    <h4 class="font-bold text-gray-500 mb-1">Souveraineté Numérique</h4>
+                    <p class="text-sm text-gray-500 mb-3">Migrer 3 services vers des alternatives libres</p>
+                    <div class="badge-progress">
+                        <div class="badge-progress-fill" style="width: 33%"></div>
+                    </div>
+                    <div class="absolute top-2 right-2">
+                        <i class="fas fa-lock text-gray-400"></i>
+                    </div>
+                </div>
+                
+                <!-- Badge 4 : Acteur de la Sobriété -->
+                <div class="badge badge-locked bg-gray-50 p-5 rounded-xl border-2 border-gray-200 text-center">
+                    <div class="text-4xl mb-3 opacity-50">🌱</div>
+                    <h4 class="font-bold text-gray-500 mb-1">Acteur de la Sobriété</h4>
+                    <p class="text-sm text-gray-500 mb-3">Réduire de 30% la consommation numérique</p>
+                    <div class="badge-progress">
+                        <div class="badge-progress-fill" style="width: 45%"></div>
+                    </div>
+                    <div class="absolute top-2 right-2">
+                        <i class="fas fa-lock text-gray-400"></i>
+                    </div>
+                </div>
+                
+                <!-- Badge 5 : Mentor du Libre -->
+                <div class="badge badge-locked bg-gray-50 p-5 rounded-xl border-2 border-gray-200 text-center">
+                    <div class="text-4xl mb-3 opacity-50">👨‍🏫</div>
+                    <h4 class="font-bold text-gray-500 mb-1">Mentor du Libre</h4>
+                    <p class="text-sm text-gray-500 mb-3">Former 5 collègues aux logiciels libres</p>
+                    <div class="badge-progress">
+                        <div class="badge-progress-fill" style="width: 20%"></div>
+                    </div>
+                    <div class="absolute top-2 right-2">
+                        <i class="fas fa-lock text-gray-400"></i>
+                    </div>
+                </div>
+                
+                <!-- Badge 6 : Ambassadeur NIRD -->
+                <div class="badge badge-locked bg-gray-50 p-5 rounded-xl border-2 border-gray-200 text-center">
+                    <div class="text-4xl mb-3 opacity-50">📢</div>
+                    <h4 class="font-bold text-gray-500 mb-1">Ambassadeur NIRD</h4>
+                    <p class="text-sm text-gray-500 mb-3">Partager son expérience dans 3 événements</p>
+                    <div class="badge-progress">
+                        <div class="badge-progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div class="absolute top-2 right-2">
+                        <i class="fas fa-lock text-gray-400"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 text-center">
+                <p class="text-gray-600 mb-4">
+                    <i class="fas fa-lightbulb mr-2 text-amber-500"></i>
+                    Complétez les missions pour débloquer de nouveaux badges !
+                </p>
+            </div>
+        </section>
+
+        <!-- Section Liens -->
+        <section>
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-8 flex items-center gap-3">
+                <i class="fas fa-link text-blue-500"></i>
+                Rejoindre l'écosystème NIRD
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <a href="#" class="link-card bg-white p-6 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                            <i class="fas fa-comments text-blue-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg text-gray-800">Forum Tchap</h3>
+                            <p class="text-gray-600 mt-1">Échangez avec la communauté des résistants</p>
+                        </div>
+                    </div>
+                </a>
+                
+                <a href="#" class="link-card bg-white p-6 rounded-xl border border-gray-200 hover:border-green-300 hover:shadow-md transition-all">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center">
+                            <i class="fab fa-gitlab text-green-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg text-gray-800">Ressources GitLab</h3>
+                            <p class="text-gray-600 mt-1">Toutes les documentations et outils</p>
+                        </div>
+                    </div>
+                </a>
+                
+                <a href="#" class="link-card bg-white p-6 rounded-xl border border-gray-200 hover:border-purple-300 hover:shadow-md transition-all">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
+                            <i class="fas fa-download text-purple-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg text-gray-800">Distributions NIRD</h3>
+                            <p class="text-gray-600 mt-1">Télécharger les ISO personnalisées</p>
+                        </div>
+                    </div>
+                </a>
+                
+                <a href="#" class="link-card bg-white p-6 rounded-xl border border-gray-200 hover:border-amber-300 hover:shadow-md transition-all">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center">
+                            <i class="fas fa-calendar-alt text-amber-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg text-gray-800">Événements</h3>
+                            <p class="text-gray-600 mt-1">Webinaires et rencontres à venir</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast de notification -->
+    <div id="achievementToast" class="fixed bottom-4 right-4 bg-white rounded-xl shadow-lg border border-green-200 p-4 max-w-sm transform translate-y-full transition-transform duration-300 hidden">
+        <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-medal text-green-600"></i>
+            </div>
+            <div>
+                <h4 class="font-bold text-gray-800">Nouveau badge débloqué !</h4>
+                <p class="text-gray-600 text-sm mt-1" id="badgeMessage">Félicitations pour votre progression</p>
+            </div>
+            <button class="ml-auto text-gray-400 hover:text-gray-600" onclick="hideToast()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
     </div>
 
-    <!-- SECTION: Badges -->
-    <h2 class="text-2xl font-bold text-green-700 mt-12 mb-6">🏅 Badges NIRD</h2>
+    <script>
+        // Système de progression et badges
+        const missions = {
+            1: { completed: true, badgeRequirements: ['pingouin'] },
+            2: { completed: false, badgeRequirements: ['mentor', 'ambassadeur'] },
+            3: { completed: true, badgeRequirements: ['mentor', 'reconditionneur'] },
+            4: { completed: true, badgeRequirements: ['sobriete'] }
+        };
+        
+        const badges = {
+            'pingouin': { 
+                unlocked: true, 
+                name: 'Pingouin Initié', 
+                description: 'Première installation Linux réussie',
+                icon: '🐧',
+                color: 'green'
+            },
+            'reconditionneur': { 
+                unlocked: true, 
+                name: 'Reconditionneur', 
+                description: '5 appareils donnés une seconde vie',
+                icon: '♻️',
+                color: 'emerald'
+            },
+            'souverainete': { 
+                unlocked: false, 
+                name: 'Souveraineté Numérique', 
+                description: 'Migrer 3 services vers des alternatives libres',
+                icon: '🔐',
+                color: 'blue'
+            },
+            'sobriete': { 
+                unlocked: false, 
+                name: 'Acteur de la Sobriété', 
+                description: 'Réduire de 30% la consommation numérique',
+                icon: '🌱',
+                color: 'green'
+            },
+            'mentor': { 
+                unlocked: false, 
+                name: 'Mentor du Libre', 
+                description: 'Former 5 collègues aux logiciels libres',
+                icon: '👨‍🏫',
+                color: 'purple'
+            },
+            'ambassadeur': { 
+                unlocked: false, 
+                name: 'Ambassadeur NIRD', 
+                description: 'Partager son expérience dans 3 événements',
+                icon: '📢',
+                color: 'amber'
+            }
+        };
+        
+        // Calculer la progression globale
+        function calculateProgress() {
+            const completedMissions = Object.values(missions).filter(m => m.completed).length;
+            const totalMissions = Object.keys(missions).length;
+            const progress = Math.round((completedMissions / totalMissions) * 100);
+            
+            // Mettre à jour l'affichage
+            document.getElementById('globalProgress').textContent = progress;
+                        document.getElementById('globalProgress2').textContent = progress;
 
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="bg-white p-4 text-center border border-gray-200 rounded-lg shadow-sm">
-        🐧<br>Pingouin Initié
-      </div>
-      <div class="bg-white p-4 text-center border border-gray-200 rounded-lg shadow-sm">
-        ♻️<br>Reconditionneur
-      </div>
-      <div class="bg-white p-4 text-center border border-gray-200 rounded-lg shadow-sm">
-        🔐<br>Souveraineté Numérique
-      </div>
-      <div class="bg-white p-4 text-center border border-gray-200 rounded-lg shadow-sm">
-        🌱<br>Acteur de la Sobriété
-      </div>
-    </div>
+            document.getElementById('progressCircle').style.strokeDashoffset = 283 - (283 * progress / 100);
+            
+            // Mettre à jour les statistiques
+            document.querySelectorAll('.stats-card')[0].querySelector('p.text-3xl').textContent = 
+                `${completedMissions}/${totalMissions}`;
+            document.querySelectorAll('.stats-card')[0].querySelector('.bg-green-500').style.width = 
+                `${(completedMissions / totalMissions) * 100}%`;
 
-    <!-- SECTION: Liens écosystème NIRD -->
-    <h2 class="text-2xl font-bold text-green-700 mt-12 mb-6">🔗 Rejoindre l’écosystème NIRD</h2>
-
-    <div class="grid md:grid-cols-2 gap-4">
-      <% if (roleData.links) { %>
-        <% for (const [key, link] of Object.entries(roleData.links)) { %>
-          <a href="<%= link %>" target="_blank" class="block bg-white p-5 border border-gray-200 rounded-lg shadow-sm hover:bg-green-50 transition">
-            <%= key.charAt(0).toUpperCase() + key.slice(1) %>
-          </a>
-        <% } %>
-      <% } %>
-    </div>
-
-  </div>
-
+                
+            
+            return progress;
+        }
+        
+        // Vérifier et mettre à jour les badges
+        function updateBadges() {
+            const badgeRequirements = {};
+            
+            // Compter les conditions remplies pour chaque badge
+            Object.values(missions).forEach(mission => {
+                if (mission.completed && mission.badgeRequirements) {
+                    mission.badgeRequirements.forEach(badge => {
+                        badgeRequirements[badge] = (badgeRequirements[badge] || 0) + 1;
+                    });
+                }
+            });
+            
+            // Débloquer les badges si les conditions sont remplies
+            Object.keys(badges).forEach(badgeKey => {
+                const badge = badges[badgeKey];
+                const requirementsMet = badgeRequirements[badgeKey] || 0;
+                
+                // Logique de déblocage (par exemple, 2 missions pour débloquer un badge)
+                if (requirementsMet >= 2 && !badge.unlocked) {
+                    unlockBadge(badgeKey);
+                }
+                
+                // Mettre à jour la progression du badge
+                const badgeElement = document.querySelector(`[data-badge="${badgeKey}"]`);
+                if (badgeElement) {
+                    const progressFill = badgeElement.querySelector('.badge-progress-fill');
+                    const progressPercentage = Math.min((requirementsMet / 2) * 100, 100);
+                    progressFill.style.width = `${progressPercentage}%`;
+                }
+            });
+            
+            // Mettre à jour le compteur de badges débloqués
+            const unlockedBadges = Object.values(badges).filter(b => b.unlocked).length;
+            document.querySelectorAll('.stats-card')[1].querySelector('p.text-3xl').textContent = 
+                `${unlockedBadges}/${Object.keys(badges).length}`;
+            document.querySelectorAll('.stats-card')[1].querySelector('.bg-amber-500').style.width = 
+                `${(unlockedBadges / Object.keys(badges).length) * 100}%`;
+        }
+        
+        // Débloquer un badge avec animation
+        function unlockBadge(badgeKey) {
+            const badge = badges[badgeKey];
+            badge.unlocked = true;
+            
+            // Trouver l'élément badge correspondant
+            const badgeElements = document.querySelectorAll('.badge');
+            badgeElements.forEach(el => {
+                const badgeTitle = el.querySelector('h4').textContent;
+                if (badgeTitle === badge.name) {
+                    // Retirer la classe "locked"
+                    el.classList.remove('badge-locked');
+                    el.classList.add('border-green-300');
+                    
+                    // Mettre à jour l'icône
+                    const lockIcon = el.querySelector('.fa-lock');
+                    if (lockIcon) {
+                        lockIcon.classList.remove('fa-lock', 'text-gray-400');
+                        lockIcon.classList.add('fa-check-circle', 'text-green-500');
+                    }
+                    
+                    // Animation
+                    el.classList.add('achievement-animation');
+                    setTimeout(() => {
+                        el.classList.remove('achievement-animation');
+                    }, 2000);
+                    
+                    // Afficher la notification
+                    showBadgeNotification(badge);
+                }
+            });
+        }
+        
+        // Afficher une notification de badge
+        function showBadgeNotification(badge) {
+            const toast = document.getElementById('achievementToast');
+            const badgeMessage = document.getElementById('badgeMessage');
+            
+            badgeMessage.textContent = `Vous avez débloqué le badge "${badge.name}" !`;
+            
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('translate-y-0');
+                toast.classList.remove('translate-y-full');
+            }, 10);
+            
+            // Son de notification (optionnel)
+            const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3');
+            audio.volume = 0.3;
+            audio.play().catch(() => {}); // Ignorer les erreurs si l'audio échoue
+        }
+        
+        function hideToast() {
+            const toast = document.getElementById('achievementToast');
+            toast.classList.remove('translate-y-0');
+            toast.classList.add('translate-y-full');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 300);
+        }
+        
+        // Gérer le clic sur les missions
+        document.querySelectorAll('.mission-toggle').forEach(button => {
+            button.addEventListener('click', function() {
+                const missionId = this.getAttribute('data-mission');
+                const isCompleted = this.classList.contains('border-green-500');
+                
+                if (isCompleted) {
+                    // Décocher la mission
+                    this.classList.remove('border-green-500');
+                    this.classList.add('border-gray-300');
+                    this.innerHTML = '<i class="fas fa-plus text-gray-400"></i>';
+                    missions[missionId].completed = false;
+                } else {
+                    // Cocher la mission
+                    this.classList.remove('border-gray-300');
+                    this.classList.add('border-green-500');
+                    this.innerHTML = '<i class="fas fa-check text-green-500"></i>';
+                    missions[missionId].completed = true;
+                    
+                    // Effet visuel
+                    this.classList.add('pulse');
+                    setTimeout(() => {
+                        this.classList.remove('pulse');
+                    }, 2000);
+                }
+                
+                // Mettre à jour la progression et les badges
+                calculateProgress();
+                updateBadges();
+            });
+        });
+        
+        // Initialiser
+        document.addEventListener('DOMContentLoaded', function() {
+            calculateProgress();
+            updateBadges();
+            
+            // Ajouter les attributs data-badge aux éléments badge
+            document.querySelectorAll('.badge').forEach((badgeEl, index) => {
+                const badgeKeys = Object.keys(badges);
+                if (index < badgeKeys.length) {
+                    badgeEl.setAttribute('data-badge', badgeKeys[index]);
+                }
+            });
+            
+            // Auto-hide toast après 5 secondes
+            setTimeout(hideToast, 5000);
+        });
+    </script>
 </body>
 </html>

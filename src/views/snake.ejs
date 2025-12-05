@@ -1,0 +1,247 @@
+<div class="konamisnake">
+<style>
+    .snake_hidden {
+        margin: 0;
+        background: black;
+        overflow: hidden;
+        font-family: monospace;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .snake_canva {
+        background: black;
+        display: block;
+        z-index:100;
+    }
+</style>
+</head>
+<div class="snake_hidden">
+<canvas class="snake_canva" id="gameCanvas"></canvas>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+const scale = 20;
+const rows = 30;
+const cols = 40;
+
+let snake;
+let food;
+let matrixDrops = [];
+let gameStarted = false; // Snake and background hidden initially
+
+let frameCount = 0;
+const snakeSpeed = 5;
+
+// Konami code
+const konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+let konamiIndex = 0;
+
+// Initialize matrix drops
+for (let x = 0; x < cols; x++) {
+    matrixDrops[x] = Math.floor(Math.random() * rows);
+}
+
+// Snake constructor
+function Snake() {
+    this.x = 0;
+    this.y = 0;
+    this.xSpeed = scale * 1;
+    this.ySpeed = 0;
+    this.total = 0;
+    this.tail = [];
+
+    this.draw = function() {
+        // Draw body
+        ctx.fillStyle = '#00FF00';
+        for (let i = 0; i < this.tail.length; i++) {
+            drawCircle(this.tail[i].x + scale/2, this.tail[i].y + scale/2, scale/2);
+        }
+        // Draw head with brighter color
+        ctx.fillStyle = '#7CFC00';
+        drawCircle(this.x + scale/2, this.y + scale/2, scale/2);
+        // Draw eyes
+        ctx.fillStyle = 'black';
+        const eyeSize = scale/6;
+        const eyeOffset = scale/5;
+        if (this.xSpeed >= 0) { // moving right
+            drawCircle(this.x + scale/2 + eyeOffset, this.y + scale/2 - eyeOffset, eyeSize);
+            drawCircle(this.x + scale/2 + eyeOffset, this.y + scale/2 + eyeOffset, eyeSize);
+        } else if (this.xSpeed < 0) { // moving left
+            drawCircle(this.x + scale/2 - eyeOffset, this.y + scale/2 - eyeOffset, eyeSize);
+            drawCircle(this.x + scale/2 - eyeOffset, this.y + scale/2 + eyeOffset, eyeSize);
+        } else if (this.ySpeed < 0) { // moving up
+            drawCircle(this.x + scale/2 - eyeOffset, this.y + scale/2 - eyeOffset, eyeSize);
+            drawCircle(this.x + scale/2 + eyeOffset, this.y + scale/2 - eyeOffset, eyeSize);
+        } else { // moving down
+            drawCircle(this.x + scale/2 - eyeOffset, this.y + scale/2 + eyeOffset, eyeSize);
+            drawCircle(this.x + scale/2 + eyeOffset, this.y + scale/2 + eyeOffset, eyeSize);
+        }
+    }
+
+    this.update = function() {
+        if (this.total === this.tail.length) {
+            for (let i = 0; i < this.tail.length - 1; i++) {
+                this.tail[i] = this.tail[i + 1];
+            }
+        }
+        if (this.total >= 1) {
+            this.tail[this.total - 1] = { x: this.x, y: this.y };
+        }
+
+        this.x += this.xSpeed;
+        this.y += this.ySpeed;
+
+        if (this.x >= canvas.width) this.x = 0;
+        if (this.x < 0) this.x = canvas.width - scale;
+        if (this.y >= canvas.height) this.y = 0;
+        if (this.y < 0) this.y = canvas.height - scale;
+    }
+
+    this.eat = function(food) {
+        if (this.x === food.x && this.y === food.y) {
+            this.total++;
+            return true;
+        }
+        return false;
+    }
+
+    this.checkCollision = function() {
+        for (let i = 0; i < this.tail.length; i++) {
+            if (this.x === this.tail[i].x && this.y === this.tail[i].y) {
+                alert("Game Over! Your score: " + this.total);
+                this.total = 0;
+                this.tail = [];
+                canvas.width = 0;
+                canvas.height = 0;
+                window.location.reload();
+            }
+        }
+    }
+
+    this.changeDirection = function(direction) {
+        switch (direction) {
+            case 'Up':
+                if (this.ySpeed === 0) {
+                    this.xSpeed = 0;
+                    this.ySpeed = -scale * 1;
+                }
+                break;
+            case 'Down':
+                if (this.ySpeed === 0) {
+                    this.xSpeed = 0;
+                    this.ySpeed = scale * 1;
+                }
+                break;
+            case 'Left':
+                if (this.xSpeed === 0) {
+                    this.xSpeed = -scale * 1;
+                    this.ySpeed = 0;
+                }
+                break;
+            case 'Right':
+                if (this.xSpeed === 0) {
+                    this.xSpeed = scale * 1;
+                    this.ySpeed = 0;
+                }
+                break;
+        }
+    }
+}
+
+// Draw a filled circle
+function drawCircle(x, y, radius) {
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI*2);
+    ctx.fill();
+}
+
+// Food constructor
+function Food() {
+    this.x;
+    this.y;
+
+    this.pickLocation = function() {
+        this.x = Math.floor(Math.random() * cols) * scale;
+        this.y = Math.floor(Math.random() * rows) * scale;
+    }
+
+    this.draw = function() {
+        ctx.fillStyle = '#ff0000';
+        drawCircle(this.x + scale/2, this.y + scale/2, scale/2);
+    }
+}
+
+// Matrix rain effect
+function drawMatrixEffect() {
+    if (!gameStarted) return;
+    ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "#0F0";
+    ctx.font = scale + "px monospace";
+
+    for (let i = 0; i < matrixDrops.length; i++) {
+        const text = String.fromCharCode(33 + Math.random() * 94);
+        ctx.fillText(text, i * scale, matrixDrops[i] * scale);
+
+        if (matrixDrops[i] * scale > canvas.height && Math.random() > 0.975) {
+            matrixDrops[i] = 0;
+        }
+
+        matrixDrops[i]++;
+    }
+}
+
+// Main loop
+function gameLoop() {
+    drawMatrixEffect();
+
+    if (gameStarted) {
+        frameCount++;
+        if (frameCount % snakeSpeed === 0) {
+            food.draw();
+            snake.update();
+            snake.draw();
+            if (snake.eat(food)) food.pickLocation();
+            snake.checkCollision();
+        }
+    }
+
+    requestAnimationFrame(gameLoop);
+}
+
+// Listen for keyboard events
+window.addEventListener('keydown', e => {
+    if (!gameStarted) {
+        if (e.key === konamiCode[konamiIndex]) {
+            konamiIndex++;
+            if (konamiIndex === konamiCode.length) startGame();
+        } else {
+            konamiIndex = 0;
+        }
+    } else {
+        const direction = e.key.replace('Arrow', '');
+        snake.changeDirection(direction);
+    }
+});
+
+function startGame() {
+    gameStarted = true;
+    canvas.width = cols * scale;
+    canvas.height = rows * scale;
+    snake = new Snake();
+    food = new Food();
+    food.pickLocation();
+    alert("Konami code activated! Snake game starting!");
+}
+
+gameLoop();
+console.log("UpUpDownDownLeftRigthLeftRigthBA");
+</script>
+</div>
+

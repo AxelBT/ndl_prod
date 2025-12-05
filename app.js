@@ -28,6 +28,14 @@ app.get("/", (req, res) => {
   res.render("home");
 });
 
+app.get("/snake", (req, res) => {
+  res.render("snake");
+});
+
+app.get("/audio", (req, res) => {
+  res.render("audio");
+});
+
 app.get("/choose-role", (req, res) => {
   res.render("choose-role");
 });

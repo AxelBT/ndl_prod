@@ -23,12 +23,15 @@
         
         body {
             background-color: var(--retro-bg);
+            background-image: 
+                linear-gradient(var(--retro-grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--retro-grid) 1px, transparent 1px);
+            background-size: 40px 40px;
             font-family: 'VT323', 'Courier New', monospace;
             color: var(--retro-green);
             min-height: 100vh;
             overflow-x: hidden;
             position: relative;
-            margin: 0;
         }
         
         /* Effet CRT (écran cathodique) */
@@ -287,8 +290,8 @@
             z-index: -1;
         }
         
-        /* Matrix rain effect retro - NOUVEAU STYLE */
-        .matrix-visualizer {
+        /* Matrix rain effect retro */
+        .matrix-rain {
             position: fixed;
             top: 0;
             left: 0;
@@ -297,45 +300,6 @@
             z-index: -2;
             opacity: 0.4;
             filter: blur(0.5px);
-            pointer-events: none;
-        }
-        
-        /* Contrôles du visualiseur */
-        .visualizer-controls {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10000;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 10px 15px;
-            border: 2px solid var(--retro-green);
-            border-radius: 5px;
-            backdrop-filter: blur(5px);
-        }
-        
-        .visualizer-controls button, .visualizer-controls input[type="file"] {
-            color: var(--retro-green);
-            background: #000;
-            border: 1px solid var(--retro-green);
-            padding: 8px 12px;
-            margin: 0;
-            cursor: pointer;
-            font-family: 'VT323', monospace;
-            font-size: 1rem;
-            transition: all 0.3s;
-        }
-        
-        .visualizer-controls button:hover, .visualizer-controls input[type="file"]:hover {
-            background: rgba(0, 255, 65, 0.2);
-            box-shadow: 0 0 10px var(--retro-green);
-        }
-        
-        .visualizer-controls input[type="file"] {
-            max-width: 200px;
         }
         
         /* 8-bit animation for stats */
@@ -362,18 +326,6 @@
             .choices-container {
                 flex-direction: column;
                 gap: 20px !important;
-            }
-            
-            .visualizer-controls {
-                flex-wrap: wrap;
-                justify-content: center;
-                width: 90%;
-                bottom: 10px;
-            }
-            
-            .visualizer-controls button, .visualizer-controls input[type="file"] {
-                padding: 6px 10px;
-                font-size: 0.9rem;
             }
         }
         
@@ -406,6 +358,7 @@
 </head>
 <body class="p-4 md:p-0">
     
+    
     <!-- Loading screen retro -->
     <div class="loading-screen">
         <div class="text-center">
@@ -417,20 +370,11 @@
         </div>
     </div>
     
-    <!-- NOUVEAU VISUALISEUR MATRIX DANCING -->
-    <canvas class="matrix-visualizer" id="matrixCanvas"></canvas>
+    <!-- Effet Matrix rétro -->
+    <canvas class="matrix-rain" id="matrixCanvas"></canvas>
     
     <!-- Pixel grid decoration -->
     <div class="pixel-grid"></div>
-    
-    <!-- Contrôles du visualiseur -->
-    <div class="visualizer-controls">
-        <input type="file" id="audioFile" accept="audio/*" class="retro-button">
-        <button id="playBtn" class="retro-button">Play</button>
-        <button id="pauseBtn" class="retro-button">Pause</button>
-        <button id="stopBtn" class="retro-button">Stop</button>
-        <button id="toggleBtn" class="retro-button">Hide Controls</button>
-    </div>
     
     <!-- Contenu principal -->
     <div class="container mx-auto px-4 py-8 md:py-16 max-w-6xl relative">
@@ -619,8 +563,8 @@
                     <button class="text-green-400 hover:text-yellow-400 transition-colors" onclick="showCredits()">
                         [ VIEW CREDITS ]
                     </button>
-                    <button class="text-green-400 hover:text-yellow-400 transition-colors" onclick="toggleVisualizer()" id="visToggleBtn">
-                        [ VISUALIZER: ON ]
+                    <button class="text-green-400 hover:text-yellow-400 transition-colors" onclick="toggleSound()">
+                        [ SOUND: ON ]
                     </button>
                 </div>
             </div>
@@ -638,339 +582,87 @@
         </footer>
     </div>
     
-    <!-- Scripts rétro gaming avec visualiseur Matrix dancing -->
+    <!-- Scripts rétro gaming -->
     <script>
-        // ==================== VISUALISEUR MATRIX DANCING ====================
+        // Effet Matrix rain rétro
         const canvas = document.getElementById('matrixCanvas');
         const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        const fontSize = 18;
-        let columns = Math.floor(canvas.width / fontSize);
-        let drops = [];
-        let waveOffsets = [];
-
-        // Caractères Matrix avec des symboles rétro gaming
-        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%<>[]{}|\\/~`+=_-?!:;"\',.';
-
-
-
-        function initDrops() {
-            drops = Array(columns).fill(1);
-            waveOffsets = Array.from({length: columns}, (_, i) => Math.random() * Math.PI * 2);
-        }
-        initDrops();
-
-        let audioCtx, analyser, source;
-        let animationId;
-        let currentAudio = null;
-        let isPaused = false;
-        let visualizerEnabled = true;
-
-        // Éléments de contrôle
-        const audioFileInput = document.getElementById('audioFile');
-        const defaultSongs = [
-    'matrix.mp3', // remplace par tes fichiers
-    'godfrey.mp3'
-];
-let currentSongIndex = 0;
-        const playBtn = document.getElementById('playBtn');
-        const pauseBtn = document.getElementById('pauseBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const toggleBtn = document.getElementById('toggleBtn');
-        const visToggleBtn = document.getElementById('visToggleBtn');
-
-        // Charger un fichier audio
-        audioFileInput.onchange = function() {
-            const file = this.files[0];
-            if(!file) return;
-
-            if(animationId) cancelAnimationFrame(animationId);
-            if(currentAudio) {
-                currentAudio.pause();
-                currentAudio.currentTime = 0;
-                currentAudio = null;
-            }
-
-            // Effacer le canvas
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            initDrops();
-
-            const audio = new Audio(URL.createObjectURL(file));
-            audio.play();
-            currentAudio = audio;
-            isPaused = false;
-
-            // Initialiser l'audio context
-            try {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioCtx.createAnalyser();
-                analyser.fftSize = 256;
-
-                source = audioCtx.createMediaElementSource(audio);
-                source.connect(analyser);
-                source.connect(audioCtx.destination);
-
-                // Démarrer l'animation
-                animate();
-            } catch(e) {
-                console.error("Erreur AudioContext:", e);
-                // Mode démo sans audio
-                animateDemo();
-            }
-        }
-
-        // Contrôles de lecture
-        playBtn.onclick = function() {
-            if(currentAudio && isPaused) {
-                currentAudio.play();
-                isPaused = false;
-                animate();
-            } else if(!currentAudio) {
-                // Si aucun audio n'est chargé, démarrer le mode démo
-                animateDemo();
-            }
-        }
-
-        pauseBtn.onclick = function() {
-            if(currentAudio && !isPaused) {
-                currentAudio.pause();
-                isPaused = true;
-                if(animationId) cancelAnimationFrame(animationId);
-            }
-        }
-
-        stopBtn.onclick = function() {
-            if(currentAudio) {
-                currentAudio.pause();
-                currentAudio.currentTime = 0;
-                currentAudio = null;
-                isPaused = false;
-            }
-            if(animationId) cancelAnimationFrame(animationId);
-
-            // Effacer le canvas
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            initDrops();
-        }
-
-        // Basculer l'affichage des contrôles
-        toggleBtn.onclick = function() {
-            const controls = document.querySelector('.visualizer-controls');
-            if(controls.style.display === 'none') {
-                controls.style.display = 'flex';
-                toggleBtn.textContent = 'Hide Controls';
-            } else {
-                controls.style.display = 'none';
-                toggleBtn.textContent = 'Show Controls';
-            }
-        }
-
-        // Fonction d'animation avec analyse audio
-        function animate() {
-            if(isPaused) return;
-
-            animationId = requestAnimationFrame(animate);
-            if(!analyser) return;
-
-            const bufferLength = analyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
-            analyser.getByteFrequencyData(dataArray);
-
-            // Fond avec effet de traînée
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Police rétro gaming
-            ctx.font = `${fontSize}px 'VT323', monospace`;
-
-            for(let i = 0; i < drops.length; i++) {
-                const freqValue = dataArray[i % bufferLength];
-                const brightness = Math.min(1, freqValue / 200);
-
-                let x = i * fontSize;
-                let y = drops[i] * fontSize;
-
-                // Effet de vague dansante horizontal
-                const wave = Math.sin(Date.now() * 0.002 + waveOffsets[i]) * 10;
-                x += wave; // mouvement horizontal
-
-                const char = letters[Math.floor(Math.random() * letters.length)];
-
-                // Couleurs dégradées rétro gaming
-                if(drops[i] <= 1) {
-                    ctx.fillStyle = "rgba(255, 255, 200, 1)"; // Blanc chaud
-                } else if(drops[i] <= 3) {
-                    ctx.fillStyle = "rgba(180, 255, 180, 0.9)"; // Vert clair
-                } else {
-                    const fadeFactor = Math.max(0.2, 1 - drops[i] * 0.0015);
-                    // Alterner entre vert, rose et bleu pour l'effet rétro
-                    const colorIndex = Math.floor(Date.now() / 1000 + i) % 3;
-                    if(colorIndex === 0) {
-                        ctx.fillStyle = `rgba(0, 255, 65, ${fadeFactor})`; // Vert néon
-                    } else if(colorIndex === 1) {
-                        ctx.fillStyle = `rgba(0, 255, 65, ${fadeFactor})`; // Rose néon
-                    } else {
-                        ctx.fillStyle = `rgba(0, 255, 65, ${fadeFactor})`; // Bleu néon
-                    }
-                }
-
-                ctx.fillText(char, x, y);
-
-                // Ajouter un mouvement vertical dansant
-                const wobble = Math.sin(Date.now() * 0.004 + i) * 0.3;
-                drops[i] += (1 + brightness * 15) * 0.13 + wobble;
-
-                if (drops[i] * fontSize > canvas.height) {
-                    drops[i] = 1;
-                    // Réinitialiser l'offset de vague pour une nouvelle colonne
-                    waveOffsets[i] = Math.random() * Math.PI * 2;
-                }
-            }
-        }
-
-        // Mode démo (sans fichier audio)
-        function animateDemo() {
-            if(!visualizerEnabled) return;
-            
-            animationId = requestAnimationFrame(animateDemo);
-
-            // Générer des données de fréquence simulées
-            const bufferLength = 128;
-            const dataArray = new Uint8Array(bufferLength);
-            const time = Date.now() * 0.001;
-            
-            for(let i = 0; i < bufferLength; i++) {
-                // Créer un pattern intéressant de fréquences
-                const baseFreq = Math.sin(time * 0.5 + i * 0.1) * 50 + 100;
-                const pulse = Math.sin(time * 2 + i * 0.05) * 30;
-                const noise = Math.random() * 20;
-                dataArray[i] = Math.min(255, Math.max(0, baseFreq + pulse + noise));
-            }
-
-            // Fond avec effet de traînée
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Police rétro gaming
-            ctx.font = `${fontSize}px 'VT323', monospace`;
-
-            for(let i = 0; i < drops.length; i++) {
-                const freqValue = dataArray[i % bufferLength];
-                const brightness = Math.min(1, freqValue / 200);
-
-                let x = i * fontSize;
-                let y = drops[i] * fontSize;
-
-                // Effet de vague dansante horizontal
-                const wave = Math.sin(time * 2 + waveOffsets[i]) * 12;
-                x += wave;
-
-                const char = letters[Math.floor(Math.random() * letters.length)];
-
-                // Couleurs dégradées rétro gaming
-                if(drops[i] <= 1) {
-                    ctx.fillStyle = "rgba(255, 255, 200, 1)";
-                } else if(drops[i] <= 3) {
-                    ctx.fillStyle = "rgba(180, 255, 180, 0.9)";
-                } else {
-                    const fadeFactor = Math.max(0.2, 1 - drops[i] * 0.0015);
-                    // Alterner les couleurs pour l'effet rétro
-                    const colorIndex = Math.floor(time + i * 0.01) % 3;
-                    if(colorIndex === 0) {
-                        ctx.fillStyle = `rgba(0, 255, 65, ${fadeFactor})`;
-                    } else if(colorIndex === 1) {
-                        ctx.fillStyle = `rgba(0, 255, 65, ${fadeFactor})`;
-                    } else {
-                        ctx.fillStyle = `rgba(0, 255, 65, ${fadeFactor})`;
-                    }
-                }
-
-                ctx.fillText(char, x, y);
-
-                // Ajouter un mouvement vertical dansant
-                const wobble = Math.sin(time * 4 + i) * 0.4;
-                drops[i] += (1 + brightness * 15) * 0.15 + wobble;
-
-                if (drops[i] * fontSize > canvas.height) {
-                    drops[i] = 1;
-                    waveOffsets[i] = Math.random() * Math.PI * 2;
-                }
-            }
-        }
-
-        // Redimensionnement
-        window.addEventListener('resize', () => {
+        
+        function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            columns = Math.floor(canvas.width / fontSize);
-            initDrops();
-        });
-
-        // Démarrer le mode démo au chargement
-        setTimeout(() => {
-            if(visualizerEnabled) {
-                animateDemo();
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        
+        const chars = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789$+-*/=%\"'#&_(),.;:?!\\|{}<>[]^~";
+        const matrix = chars.split("");
+        
+        const fontSize = 16;
+        let columns = canvas.width / fontSize;
+        let drops = Array(Math.floor(columns)).fill(1);
+        
+        function drawMatrix() {
+            // Fond avec effet de traînée rétro
+            ctx.fillStyle = 'rgba(10, 10, 18, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Style rétro pour les caractères
+            ctx.font = `${fontSize}px 'Press Start 2P', monospace`;
+            
+            for (let i = 0; i < drops.length; i++) {
+                // Caractère aléatoire
+                const char = matrix[Math.floor(Math.random() * matrix.length)];
+                
+                // Effet de dégradé vertical
+                const gradient = ctx.createLinearGradient(0, drops[i] * fontSize, 0, drops[i] * fontSize + 30);
+                gradient.addColorStop(0, '#00ff41');
+                gradient.addColorStop(0.5, '#00b3ff');
+                gradient.addColorStop(1, '#ff00ff');
+                
+                ctx.fillStyle = gradient;
+                ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+                
+                // Réinitialisation avec effet aléatoire
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                
+                drops[i]++;
             }
-        }, 3500);
-
-        // ==================== FONCTIONS EXISTANTES ====================
+        }
         
         // Animation loading
         document.querySelector('.loading-screen .bg-green-500').addEventListener('animationend', function() {
             this.style.width = '100%';
         });
-
-        // Toggle visualizer
-        function toggleVisualizer() {
-            visualizerEnabled = !visualizerEnabled;
+        
+        // Effets sonores (simulés)
+        function toggleSound() {
+            const btn = document.querySelector('[onclick="toggleSound()"]');
+            const current = btn.textContent.includes('ON');
+            btn.textContent = current ? '[ SOUND: OFF ]' : '[ SOUND: ON ]';
             
-            if(visualizerEnabled) {
-                canvas.style.opacity = '0.4';
-                visToggleBtn.textContent = '[ VISUALIZER: ON ]';
-                if(!animationId) {
-                    animateDemo();
-                }
-            } else {
-                canvas.style.opacity = '0';
-                visToggleBtn.textContent = '[ VISUALIZER: OFF ]';
-                if(animationId) {
-                    cancelAnimationFrame(animationId);
-                    animationId = null;
-                    // Effacer le canvas
-                    ctx.fillStyle = '#000';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-                }
+            // Effet visuel pour simuler le son
+            if (!current) {
+                document.body.style.animation = 'pixelate 0.3s';
+                setTimeout(() => {
+                    document.body.style.animation = '';
+                }, 300);
             }
         }
-
+        
         // Easter egg
         function easterEgg() {
             const title = document.querySelector('.retro-title');
             title.style.animation = 'glitch 0.5s infinite';
+            document.body.style.background = 'radial-gradient(circle, #ff00ff, #00ff41, #00b3ff)';
             
-            // Effet spécial sur le visualiseur
-            if(visualizerEnabled) {
-                // Changer temporairement les caractères
-                const originalLetters = letters;
-                // Caractères spéciaux pour l'easter egg
-                const easterChars = 'MATRIXHACKED1234567890!@#$%^&*';
-                
-                // Modifier temporairement la fonte
-                ctx.font = `${fontSize}px "Press Start 2P", monospace`;
-                
-                // Effet de surbrillance
-                canvas.style.filter = 'blur(0px) brightness(2)';
-                
-                setTimeout(() => {
-                    title.style.animation = '';
-                    canvas.style.filter = 'blur(0.5px) brightness(1)';
-                    ctx.font = `${fontSize}px 'VT323', monospace`;
-                }, 3000);
-            }
+            setTimeout(() => {
+                title.style.animation = '';
+                document.body.style.background = '';
+            }, 3000);
             
             // Message secret
             const secret = document.createElement('div');
@@ -978,8 +670,7 @@ let currentSongIndex = 0;
             secret.innerHTML = `
                 <div class="text-center">
                     <div class="text-green-400 text-2xl mb-4">EASTER EGG ACTIVATED!</div>
-                    <div class="text-white mb-6">MATRIX VISUALIZER: MAXIMUM INTENSITY</div>
-                    <div class="text-yellow-400 text-sm mb-4">Try uploading your own audio file!</div>
+                    <div class="text-white mb-6">THE MATRIX HAS YOU...</div>
                     <button onclick="this.parentElement.parentElement.remove()" class="retro-button px-6 py-3 bg-red-500">
                         [ CLOSE ]
                     </button>
@@ -987,7 +678,7 @@ let currentSongIndex = 0;
             `;
             document.body.appendChild(secret);
         }
-
+        
         // Credits
         function showCredits() {
             const credits = document.createElement('div');
@@ -1000,14 +691,6 @@ let currentSongIndex = 0;
                             <div class="flex justify-between">
                                 <span>SYSTEM DESIGN:</span>
                                 <span class="text-green-400">NIRD TEAM</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>MATRIX VISUALIZER:</span>
-                                <span class="text-green-400">DANCING EFFECT v2.0</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>AUDIO PROCESSING:</span>
-                                <span class="text-green-400">Web Audio API</span>
                             </div>
                             <div class="flex justify-between">
                                 <span>RETRO ENGINE:</span>
@@ -1032,11 +715,11 @@ let currentSongIndex = 0;
             `;
             document.body.appendChild(credits);
         }
-
+        
         // Animation de la barre de chargement
         const loadBar = document.querySelector('.loading-screen .bg-green-500');
         loadBar.style.animation = 'load 3s ease-in-out forwards';
-
+        
         // Définir l'animation de chargement
         const style = document.createElement('style');
         style.textContent = `
@@ -1046,7 +729,10 @@ let currentSongIndex = 0;
             }
         `;
         document.head.appendChild(style);
-
+        
+        // Démarrer l'animation Matrix
+        setInterval(drawMatrix, 50);
+        
         // Effet de frappe au clavier
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
@@ -1055,60 +741,8 @@ let currentSongIndex = 0;
                 setTimeout(() => {
                     redPill.style.animation = '';
                 }, 300);
-                
-                // Faire réagir le visualiseur
-                if(visualizerEnabled && drops.length > 0) {
-                    for(let i = 0; i < 10; i++) {
-                        const randomIndex = Math.floor(Math.random() * drops.length);
-                        drops[randomIndex] = 1;
-                    }
-                }
-            }
-            
-            // Touche espace pour basculer le visualiseur
-            if (e.key === ' ') {
-                e.preventDefault();
-                toggleVisualizer();
             }
         });
-
-        // Faire réagir le visualiseur aux mouvements de souris
-        document.addEventListener('mousemove', function(e) {
-            if(visualizerEnabled && drops.length > 0) {
-                const xPercent = e.clientX / window.innerWidth;
-                const columnIndex = Math.floor(xPercent * columns);
-                
-                if(columnIndex >= 0 && columnIndex < drops.length) {
-                    // Ajouter un peu de mouvement à la colonne survolée
-                    waveOffsets[columnIndex] += 0.1;
-                }
-            }
-        });
-
-        // Faire réagir le visualiseur aux clics
-        document.addEventListener('click', function(e) {
-            if(visualizerEnabled && drops.length > 0) {
-                const xPercent = e.clientX / window.innerWidth;
-                const columnIndex = Math.floor(xPercent * columns);
-                
-                if(columnIndex >= 0 && columnIndex < drops.length) {
-                    // Réinitialiser la colonne cliquée
-                    drops[columnIndex] = 1;
-                    waveOffsets[columnIndex] = Math.random() * Math.PI * 2;
-                    
-                    // Effet visuel de vague
-                    for(let i = Math.max(0, columnIndex - 5); i < Math.min(columns, columnIndex + 5); i++) {
-                        const distance = Math.abs(i - columnIndex);
-                        const delay = distance * 2;
-                        setTimeout(() => {
-                            drops[i] = 1;
-                        }, delay * 20);
-                    }
-                }
-            }
-        });
-
-        
     </script>
 </body>
 </html>
