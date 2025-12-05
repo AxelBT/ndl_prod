@@ -608,19 +608,17 @@
             }
         };
         
-        // Calculer la progression globale
         function calculateProgress() {
             const completedMissions = Object.values(missions).filter(m => m.completed).length;
             const totalMissions = Object.keys(missions).length;
             const progress = Math.round((completedMissions / totalMissions) * 100);
             
-            // Mettre à jour l'affichage
             document.getElementById('globalProgress').textContent = progress;
                         document.getElementById('globalProgress2').textContent = progress;
 
             document.getElementById('progressCircle').style.strokeDashoffset = 283 - (283 * progress / 100);
             
-            // Mettre à jour les statistiques
+            s
             document.querySelectorAll('.stats-card')[0].querySelector('p.text-3xl').textContent = 
                 `${completedMissions}/${totalMissions}`;
             document.querySelectorAll('.stats-card')[0].querySelector('.bg-green-500').style.width = 
@@ -631,11 +629,9 @@
             return progress;
         }
         
-        // Vérifier et mettre à jour les badges
         function updateBadges() {
             const badgeRequirements = {};
             
-            // Compter les conditions remplies pour chaque badge
             Object.values(missions).forEach(mission => {
                 if (mission.completed && mission.badgeRequirements) {
                     mission.badgeRequirements.forEach(badge => {
